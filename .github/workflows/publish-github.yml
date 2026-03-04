@@ -50,13 +50,13 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore solution
-        run: dotnet restore Zeayii.Flow.slnx /p:Version=${{ inputs.version }}
+        run: dotnet restore Zeayii.Flow.sln /p:Version=${{ inputs.version }}
 
       - name: Build solution
-        run: dotnet build Zeayii.Flow.slnx -c Release --no-restore /p:Version=${{ inputs.version }}
+        run: dotnet build Zeayii.Flow.sln -c Release --no-restore /p:Version=${{ inputs.version }}
 
       - name: Test solution
-        run: dotnet test Zeayii.Flow.slnx -c Release --no-build
+        run: dotnet test Zeayii.Flow.sln -c Release --no-build
 
   publish-aot:
     name: Publish - ${{ matrix.os }} / ${{ matrix.rid }}
