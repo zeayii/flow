@@ -32,7 +32,7 @@
 ## 4. 常用命令
 
 ```bash
-dotnet test Zeayii.Flow.slnx -v minimal
+dotnet test Zeayii.Flow.sln -v minimal
 ```
 
 

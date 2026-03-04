@@ -32,7 +32,7 @@ The test volume is still small, but it already protects several regression-prone
 ## 4. Common command
 
 ```bash
-dotnet test Zeayii.Flow.slnx -v minimal
+dotnet test Zeayii.Flow.sln -v minimal
 ```
 
 
