@@ -154,11 +154,38 @@ jobs:
             git push origin v${{ inputs.version }}
           fi
 
+      - name: Cleanup existing release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          TAG="v${{ inputs.version }}"
+          REPO="${{ github.repository }}"
+
+          if ! gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+            echo "Release $TAG does not exist yet. Skip asset cleanup."
+            exit 0
+          fi
+
+          assets=("flow-win-x64.exe" "flow-linux-x64" "flow-osx-x64" "flow.exe" "flow")
+          for asset_name in "${assets[@]}"; do
+            asset_id="$(gh api "repos/$REPO/releases/tags/$TAG" --jq ".assets[] | select(.name == \"$asset_name\") | .id" || true)"
+            if [[ -n "${asset_id:-}" ]]; then
+              echo "Delete existing asset: $asset_name (id=$asset_id)"
+              gh api --method DELETE "repos/$REPO/releases/assets/$asset_id"
+            else
+              echo "Asset not found, skip: $asset_name"
+            fi
+          done
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ inputs.version }}
           generate_release_notes: true
+          overwrite_files: false
           files: |
             release-files/flow-win-x64.exe
             release-files/flow-linux-x64
