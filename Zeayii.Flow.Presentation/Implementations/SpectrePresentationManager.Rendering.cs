@@ -11,6 +11,11 @@ namespace Zeayii.Flow.Presentation.Implementations;
 public sealed partial class SpectrePresentationManager
 {
     /// <summary>
+    /// 左列选中行背景样式（仅强调焦点，不覆盖语义颜色）。
+    /// </summary>
+    private static readonly Style SelectedTaskRowStyle = new(background: Color.Grey);
+
+    /// <summary>
     /// 左列固定宽度。
     /// </summary>
     private const int LeftColumnWidth = 96;
@@ -182,17 +187,6 @@ public sealed partial class SpectrePresentationManager
         {
             var task = _state.Tasks[taskIds[offset + index]];
             var elapsedText = RenderText.FormatElapsed(task.StartedAt, task.CompletedAt, now);
-            var plainLine = RenderText.PadRightPlain(string.Join(' ',
-                RenderText.PadRightPlain(RenderText.FormatTaskStatusLabel(task.Status), LeftStatusWidth),
-                RenderText.TruncateAndPad(task.Descriptor.DisplayName, LeftNameWidth),
-                new string(' ', LeftProgressWidth),
-                RenderText.PadRightPlain($"{RenderText.FormatBytes(task.TransferredBytes)}/{RenderText.FormatBytes(task.TotalBytes ?? 0)}", LeftSizeWidth),
-                RenderText.PadLeftPlain(RenderText.FormatBytesPerSecond(task.BytesPerSecond), LeftSpeedWidth),
-                RenderText.PadRightPlain(elapsedText, LeftElapsedWidth),
-                RenderText.FormatBoundedCount(task.FilesDone, LeftCountWidth),
-                RenderText.FormatBoundedCount(task.FilesTotal, LeftCountWidth),
-                RenderText.FormatBoundedCount(task.FailedFiles, LeftCountWidth)), contentWidth);
-
             var progressColor = task.Status switch
             {
                 TaskStatus.Completed => RenderText.GetTaskStatusColorName(TaskStatus.Completed),
@@ -213,7 +207,8 @@ public sealed partial class SpectrePresentationManager
                 Markup.Escape(RenderText.FormatBoundedCount(task.FilesTotal, LeftCountWidth)),
                 $"[red]{Markup.Escape(RenderText.FormatBoundedCount(task.FailedFiles, LeftCountWidth))}[/]"), contentWidth);
 
-            rows.Add(offset + index == _state.SelectedTaskIndex ? new Markup($"[black on grey84]{Markup.Escape(plainLine)}[/]") : new Markup(markupLine));
+            var isSelected = offset + index == _state.SelectedTaskIndex;
+            rows.Add(isSelected ? new Markup(markupLine, SelectedTaskRowStyle) : new Markup(markupLine));
         }
 
         if (offset + visibleRows < taskIds.Count)
@@ -715,4 +710,3 @@ public sealed partial class SpectrePresentationManager
         public List<string> TaskNames { get; } = [];
     }
 }
-
