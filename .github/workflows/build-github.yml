@@ -47,6 +47,7 @@ jobs:
         run: dotnet test Zeayii.Flow.sln -c Release --no-build
 
   publish-aot:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     name: Publish - ${{ matrix.os }} / ${{ matrix.rid }}
     runs-on: ${{ matrix.os }}
     needs: verify
@@ -79,20 +80,10 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Restore command-line project
-        run: |
-          dotnet restore Zeayii.Flow.CommandLine/Zeayii.Flow.CommandLine.csproj \
-            -r ${{ matrix.rid }} \
-            -p:PublishAot=true \
-            -p:SelfContained=true \
-            -p:DebugType=None \
-            -p:DebugSymbols=false
-
       - name: Publish NativeAOT executable
         run: |
           dotnet publish Zeayii.Flow.CommandLine/Zeayii.Flow.CommandLine.csproj \
             -c Release \
-            --no-restore \
             -r ${{ matrix.rid }} \
             -p:PublishAot=true \
             -p:PublishSingleFile=true \
