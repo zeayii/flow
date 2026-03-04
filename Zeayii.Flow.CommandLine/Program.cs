@@ -15,19 +15,19 @@ StringProvider.Configure(args);
 var rootCommand = new RootCommand(Resources.GetString("RootDescription"));
 var planJsonArgument = new Argument<FileInfo>("tasks-descriptor-json-file-path")
 {
-    Description = Resources.GetString("PlanArgumentDescription"),
+    Description = Resources.GetString("PlanArgumentDescription"), HelpName = "Tasks descriptor json file path",
     Arity = ArgumentArity.ExactlyOne
 }.AcceptLegalFilePathsOnly().AcceptExistingOnly();
 
 var langOption = new Option<string>("--lang", "-l")
 {
-    Required = false, Description = Resources.GetString("LangDescription"),
+    Required = false, Description = Resources.GetString("LangDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => string.Empty
 };
 
 var concurrencyOption = new Option<int>("--task-concurrency", "-tc")
 {
-    Required = false, Description = Resources.GetString("TaskConcurrencyDescription"),
+    Required = false, Description = Resources.GetString("TaskConcurrencyDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => 3
 };
 concurrencyOption.Validators.Add(result =>
@@ -40,7 +40,7 @@ concurrencyOption.Validators.Add(result =>
 
 var innerConcurrencyOption = new Option<int>("--subtask-concurrency", "-sc")
 {
-    Required = false, Description = Resources.GetString("SubtaskConcurrencyDescription"),
+    Required = false, Description = Resources.GetString("SubtaskConcurrencyDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => 3
 };
 innerConcurrencyOption.Validators.Add(result =>
@@ -53,7 +53,7 @@ innerConcurrencyOption.Validators.Add(result =>
 
 var retryAttemptsOption = new Option<int>("--retry-attempts", "-ra")
 {
-    Required = false, Description = Resources.GetString("RetryAttemptsDescription"),
+    Required = false, Description = Resources.GetString("RetryAttemptsDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => 5
 };
 retryAttemptsOption.Validators.Add(result =>
@@ -66,7 +66,7 @@ retryAttemptsOption.Validators.Add(result =>
 
 var blockSizeOption = new Option<int>("--block-size", "-bs")
 {
-    Required = false, Description = Resources.GetString("BlockSizeDescription"),
+    Required = false, Description = Resources.GetString("BlockSizeDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => 256
 };
 blockSizeOption.Validators.Add(result =>
@@ -79,34 +79,31 @@ blockSizeOption.Validators.Add(result =>
 
 var conflictPolicyOption = new Option<ConflictPolicy>("--conflict-policy", "-cp")
 {
-    Required = false, Description = Resources.GetString("ConflictPolicyDescription"),
+    Required = false, Description = Resources.GetString("ConflictPolicyDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => ConflictPolicy.Resume
 };
 
 var taskFailurePolicyOption = new Option<TaskFailurePolicy>("--task-failure-policy", "-tfp")
 {
-    Required = false,
-    Description = Resources.GetString("TaskFailurePolicyDescription"),
-    AllowMultipleArgumentsPerToken = false,
-    Arity = ArgumentArity.ZeroOrOne,
-    DefaultValueFactory = _ => TaskFailurePolicy.Continue
+    Required = false, Description = Resources.GetString("TaskFailurePolicyDescription"), HelpName = "value",
+    AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => TaskFailurePolicy.Continue
 };
 
 var dryRunOption = new Option<bool>("--dry-run", "-dr")
 {
-    Required = false, Description = Resources.GetString("DryRunDescription"),
+    Required = false, Description = Resources.GetString("DryRunDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => false
 };
 
 var noUiOption = new Option<bool>("--no-ui", "-nu")
 {
-    Required = false, Description = Resources.GetString("NoUiDescription"),
+    Required = false, Description = Resources.GetString("NoUiDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => false
 };
 
 var uiRefreshOption = new Option<int>("--ui-refresh", "-ur")
 {
-    Required = false, Description = Resources.GetString("UiRefreshDescription"),
+    Required = false, Description = Resources.GetString("UiRefreshDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => 200
 };
 uiRefreshOption.Validators.Add(result =>
@@ -119,8 +116,8 @@ uiRefreshOption.Validators.Add(result =>
 
 var uiLogMaxOption = new Option<int>("--ui-log-max", "-ulm")
 {
-    Required = false, Description = Resources.GetString("UiLogMaxDescription"),
-    AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => 1000
+    Required = false, Description = Resources.GetString("UiLogMaxDescription"), HelpName = "value",
+    AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => 3000
 };
 uiLogMaxOption.Validators.Add(result =>
 {
@@ -132,31 +129,25 @@ uiLogMaxOption.Validators.Add(result =>
 
 var uiLogLevelOption = new Option<LogLevel>("--ui-log-level", "-ull")
 {
-    Required = false, Description = Resources.GetString("UiLogLevelDescription"),
+    Required = false, Description = Resources.GetString("UiLogLevelDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => LogLevel.Information
 };
 
 var logDirectoryOption = new Option<DirectoryInfo>("--log-directory", "-ld")
 {
-    Required = false,
-    Description = Resources.GetString("LogDirectoryDescription"),
-    AllowMultipleArgumentsPerToken = false,
-    Arity = ArgumentArity.ZeroOrOne,
-    DefaultValueFactory = _ => new DirectoryInfo(Path.Combine(Path.GetTempPath(), "sync"))
+    Required = false, Description = Resources.GetString("LogDirectoryDescription"), HelpName = "value",
+    AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => new DirectoryInfo(Path.Combine(Path.GetTempPath(), "flow"))
 };
 
 var fileLogLevelOption = new Option<LogLevel>("--file-log-level", "-fll")
 {
-    Required = false,
-    Description = Resources.GetString("FileLogLevelDescription"),
-    AllowMultipleArgumentsPerToken = false,
-    Arity = ArgumentArity.ZeroOrOne,
-    DefaultValueFactory = _ => LogLevel.None
+    Required = false, Description = Resources.GetString("FileLogLevelDescription"), HelpName = "value",
+    AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => LogLevel.None
 };
 
 var uiFailMaxOption = new Option<int>("--ui-fail-max", "-ufm")
 {
-    Required = false, Description = Resources.GetString("UiFailMaxDescription"),
+    Required = false, Description = Resources.GetString("UiFailMaxDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => 2000
 };
 uiFailMaxOption.Validators.Add(result =>
@@ -169,7 +160,7 @@ uiFailMaxOption.Validators.Add(result =>
 
 var uiDoneMaxOption = new Option<int>("--ui-done-max", "-udm")
 {
-    Required = false, Description = Resources.GetString("UiDoneMaxDescription"),
+    Required = false, Description = Resources.GetString("UiDoneMaxDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => 200
 };
 uiDoneMaxOption.Validators.Add(result =>
@@ -182,7 +173,7 @@ uiDoneMaxOption.Validators.Add(result =>
 
 var uiTaskMaxOption = new Option<int>("--ui-task-max", "-utm")
 {
-    Required = false, Description = Resources.GetString("UiTaskMaxDescription"),
+    Required = false, Description = Resources.GetString("UiTaskMaxDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => 50_000
 };
 uiTaskMaxOption.Validators.Add(result =>
@@ -195,7 +186,7 @@ uiTaskMaxOption.Validators.Add(result =>
 
 var uiPageSizeOption = new Option<int>("--ui-page-size", "-ups")
 {
-    Required = false, Description = Resources.GetString("UiPageSizeDescription"),
+    Required = false, Description = Resources.GetString("UiPageSizeDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => 20
 };
 uiPageSizeOption.Validators.Add(result =>
@@ -208,7 +199,7 @@ uiPageSizeOption.Validators.Add(result =>
 
 var uiFailShowOption = new Option<int>("--ui-fail-show", "-ufs")
 {
-    Required = false, Description = Resources.GetString("UiFailShowDescription"),
+    Required = false, Description = Resources.GetString("UiFailShowDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => 50
 };
 uiFailShowOption.Validators.Add(result =>
@@ -221,7 +212,7 @@ uiFailShowOption.Validators.Add(result =>
 
 var uiDoneShowOption = new Option<int>("--ui-done-show", "-uds")
 {
-    Required = false, Description = Resources.GetString("UiDoneShowDescription"),
+    Required = false, Description = Resources.GetString("UiDoneShowDescription"), HelpName = "value",
     AllowMultipleArgumentsPerToken = false, Arity = ArgumentArity.ZeroOrOne, DefaultValueFactory = _ => 50
 };
 uiDoneShowOption.Validators.Add(result =>
