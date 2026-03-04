@@ -28,14 +28,14 @@ sequenceDiagram
     participant User
     participant CLI as Program
     participant LOC as CliTextProvider
-    participant OPT as OptionsBuilder
+    participant OPTS as OptionsBuilder
     participant LDR as JsonFileLoader
     participant ENG as TaskTransferEngine
 
     User->>CLI: run flow with plan
     CLI->>LOC: configure culture
     CLI->>LDR: load plan.json
-    CLI->>OPT: build options
+    CLI->>OPTS: build options
     CLI->>ENG: run tasks
     ENG-->>CLI: exit code
     CLI-->>User: console or tui

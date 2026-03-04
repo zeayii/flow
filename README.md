@@ -48,15 +48,15 @@ Flow 是一个面向 `网盘映射目录 <-> 本地媒体目录` 场景的模块
 sequenceDiagram
     participant User as User
     participant CLI as CommandLine
-    participant OPT as OptionsBuilder
+    participant OPTS as OptionsBuilder
     participant ENG as TaskTransferEngine
     participant RUN as TaskRuntime
     participant CAP as FileTransferCapability
     participant UI as Presentation
 
     User->>CLI: run flow with plan
-    CLI->>OPT: parse CLI + build ApplicationOptions
-    OPT->>ENG: build CoreOptions / TaskRequest list
+    CLI->>OPTS: parse cli and build app options
+    OPTS->>ENG: build core options and task requests
     CLI->>UI: start dashboard
     ENG->>RUN: schedule top-level tasks
     RUN->>CAP: stream copy / resume / finalize
