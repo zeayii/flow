@@ -5,7 +5,7 @@ namespace Zeayii.Flow.CommandLine.Localization;
 /// <summary>
 /// 提供命令行文案的本地化解析能力。
 /// </summary>
-internal static class CliTextProvider
+internal static class StringProvider
 {
     /// <summary>
     /// 根据参数与系统文化配置文案文化。
@@ -26,10 +26,7 @@ internal static class CliTextProvider
     private static CultureInfo ResolveCulture(string[] args)
     {
         var fromArgument = TryReadLanguageFromArguments(args);
-        var normalizedTag = !string.IsNullOrWhiteSpace(fromArgument)
-            ? NormalizeLanguageTag(fromArgument)
-            : NormalizeLanguageTag(CultureInfo.CurrentUICulture.Name);
-
+        var normalizedTag = !string.IsNullOrWhiteSpace(fromArgument) ? NormalizeLanguageTag(fromArgument) : NormalizeLanguageTag(CultureInfo.CurrentUICulture.Name);
         return CultureInfo.GetCultureInfo(normalizedTag);
     }
 

@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Zeayii.Flow.Presentation.Abstractions;
 using Zeayii.Flow.Presentation.Extensions;
 
-CliTextProvider.Configure(args);
+StringProvider.Configure(args);
 
 var rootCommand = new RootCommand(Resources.GetString("RootDescription"));
 var planJsonArgument = new Argument<FileInfo>("tasks-descriptor-json-file-path")

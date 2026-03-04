@@ -159,7 +159,8 @@ public sealed partial class SpectrePresentationManager
     private IRenderable RenderTaskListPanel(int width, int height)
     {
         var taskIds = _state.GetSortedTaskIds();
-        var contentWidth = Math.Max(36, width - 4);
+        // Panel 已经取消左右内边距，此处只需要扣除边框占用的 2 个字符。
+        var contentWidth = Math.Max(36, width - 2);
         var now = DateTimeOffset.UtcNow;
         var rows = new List<IRenderable>(Math.Max(8, height))
         {
@@ -212,14 +213,7 @@ public sealed partial class SpectrePresentationManager
                 Markup.Escape(RenderText.FormatBoundedCount(task.FilesTotal, LeftCountWidth)),
                 $"[red]{Markup.Escape(RenderText.FormatBoundedCount(task.FailedFiles, LeftCountWidth))}[/]"), contentWidth);
 
-            if (offset + index == _state.SelectedTaskIndex)
-            {
-                rows.Add(new Markup($"[black on grey84]{Markup.Escape(plainLine)}[/]"));
-            }
-            else
-            {
-                rows.Add(new Markup(markupLine));
-            }
+            rows.Add(offset + index == _state.SelectedTaskIndex ? new Markup($"[black on grey84]{Markup.Escape(plainLine)}[/]") : new Markup(markupLine));
         }
 
         if (offset + visibleRows < taskIds.Count)
@@ -328,7 +322,8 @@ public sealed partial class SpectrePresentationManager
     /// <returns>日志面板。</returns>
     private IRenderable RenderLogPanel(int width, int height)
     {
-        var contentWidth = Math.Max(16, width - 4);
+        // Panel 已经取消左右内边距，此处只需要扣除边框占用的 2 个字符。
+        var contentWidth = Math.Max(16, width - 2);
         var rows = new List<IRenderable>(Math.Max(8, height));
         var visibleRows = Math.Max(1, height - 4);
         _state.LogPageSize = visibleRows;
@@ -422,7 +417,8 @@ public sealed partial class SpectrePresentationManager
     private IRenderable RenderDetailFilesPanel(int width, int height)
     {
         var files = _state.GetSelectedTaskFiles();
-        var contentWidth = Math.Max(40, width - 4);
+        // Panel 已经取消左右内边距，此处只需要扣除边框占用的 2 个字符。
+        var contentWidth = Math.Max(40, width - 2);
         const int statusWidth = 8;
         const int sizeWidth = 10;
         const int doneWidth = 10;
@@ -584,7 +580,6 @@ public sealed partial class SpectrePresentationManager
                 TaskStatus.Failed or TaskStatus.CompletedWithErrors => 1,
                 TaskStatus.Pending or TaskStatus.Scanning => 2,
                 TaskStatus.Completed => 3,
-                TaskStatus.Skipped or TaskStatus.Canceled => 4,
                 _ => 4
             };
             sections[index].TaskNames.Add(RenderText.TruncateAndPad(task.Descriptor.DisplayName, MiddleNameWidth));
@@ -618,10 +613,11 @@ public sealed partial class SpectrePresentationManager
     /// <returns>网格行集合。</returns>
     private static IEnumerable<string> BuildSummaryGridRows(SummarySection section, int width)
     {
-        var contentWidth = Math.Max(8, width - 4);
+        // Panel 已经取消左右内边距，此处只需要扣除边框占用的 2 个字符。
+        var contentWidth = Math.Max(8, width - 2);
         var separatorWidth = 1;
         var effectiveColumns = MiddleGridColumns;
-        var totalRequiredWidth = effectiveColumns * MiddleNameWidth + (effectiveColumns - 1) * separatorWidth;
+        var totalRequiredWidth = effectiveColumns * MiddleNameWidth + effectiveColumns - 1;
         if (contentWidth < totalRequiredWidth)
         {
             effectiveColumns = Math.Max(1, (contentWidth + separatorWidth) / (MiddleNameWidth + separatorWidth));
@@ -719,6 +715,5 @@ public sealed partial class SpectrePresentationManager
         public List<string> TaskNames { get; } = [];
     }
 }
-
 
 

@@ -1,6 +1,6 @@
+using Microsoft.Extensions.Logging;
 using Zeayii.Flow.CommandLine.Options;
 using Zeayii.Flow.Core.Abstractions;
-using Microsoft.Extensions.Logging;
 
 namespace Zeayii.Flow.Tests;
 
