@@ -10,55 +10,90 @@ namespace Zeayii.Flow.Presentation.Implementations;
 public sealed partial class SpectrePresentationManager
 {
     /// <summary>
-    /// 运行控制台 Dashboard 主循环。
+    /// UI 线程主循环。
     /// </summary>
     /// <param name="ct">取消令牌。</param>
-    /// <returns>后台任务。</returns>
-    private async Task RunDashboardAsync(CancellationToken ct)
+    private void RunDashboardLoop(CancellationToken ct)
     {
-        await InitializeFileLoggerAsync(ct).ConfigureAwait(false);
-
         try
         {
-            await AnsiConsole.Live(RenderCurrentView())
+            AnsiConsole.Live(RenderCurrentView())
                 .AutoClear(false)
                 .Overflow(VerticalOverflow.Ellipsis)
-                .StartAsync(async context =>
+                .Start(context =>
                 {
                     while (!ct.IsCancellationRequested)
                     {
                         ApplyIncomingEvents();
-                        DrainLogs();
+                        DrainUiLogs();
                         PollKeyboard();
                         context.UpdateTarget(RenderCurrentView());
-
-                        try
-                        {
-                            await Task.Delay(_options.RefreshInterval, ct).ConfigureAwait(false);
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            break;
-                        }
+                        Thread.Sleep(_options.RefreshInterval);
                     }
 
                     ApplyIncomingEvents();
-                    DrainLogs();
+                    DrainUiLogs();
                     context.UpdateTarget(RenderCurrentView());
-                }).ConfigureAwait(false);
+                });
         }
-        finally
+        catch (OperationCanceledException)
         {
-            await FlushAndDisposeLoggerAsync().ConfigureAwait(false);
+            // 说明：取消时正常退出 UI 线程。
         }
     }
 
     /// <summary>
-    /// 处理事件通道中的所有待处理事件。
+    /// 日志线程主循环。
+    /// </summary>
+    /// <param name="ct">取消令牌。</param>
+    private void RunLogLoop(CancellationToken ct)
+    {
+        InitializeFileLogger();
+
+        try
+        {
+            while (!ct.IsCancellationRequested || _logs.Count > 0)
+            {
+                if (!_logs.TryTake(out var entry, 100))
+                {
+                    continue;
+                }
+
+                if (entry.Level >= _options.TuiLogLevel)
+                {
+                    while (Volatile.Read(ref _pendingUiLogCount) >= PendingUiLogCapacity)
+                    {
+                        if (!_pendingUiLogs.TryDequeue(out _))
+                        {
+                            break;
+                        }
+
+                        Interlocked.Decrement(ref _pendingUiLogCount);
+                    }
+
+                    _pendingUiLogs.Enqueue(entry);
+                    Interlocked.Increment(ref _pendingUiLogCount);
+                }
+
+                if (_fileLogWriter is not null && entry.Level >= _options.FileLogLevel)
+                {
+                    var scope = string.IsNullOrWhiteSpace(entry.Scope) ? "global" : entry.Scope;
+                    _fileLogWriter.WriteLine($"[{entry.Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{RenderText.GetLogLevelTag(entry.Level)}] [{scope}] {entry.Message}");
+                }
+            }
+        }
+        finally
+        {
+            FlushAndDisposeLogger();
+        }
+    }
+
+    /// <summary>
+    /// 处理事件队列中的所有待处理事件。
     /// </summary>
     private void ApplyIncomingEvents()
     {
-        while (_events.Reader.TryRead(out var presentationEvent))
+        while (_events.TryTake(out var presentationEvent))
         {
             switch (presentationEvent)
             {
@@ -247,22 +282,14 @@ public sealed partial class SpectrePresentationManager
     }
 
     /// <summary>
-    /// 从日志通道拉取日志并写入内存与文件。
+    /// 将日志线程传递的日志写入 UI 内存状态。
     /// </summary>
-    private void DrainLogs()
+    private void DrainUiLogs()
     {
-        while (_logs.Reader.TryRead(out var entry))
+        while (_pendingUiLogs.TryDequeue(out var entry))
         {
-            if (entry.Level >= _options.TuiLogLevel)
-            {
-                _state.LogEntries.Add(entry);
-            }
-
-            if (_fileLogWriter is not null && entry.Level >= _options.FileLogLevel)
-            {
-                var scope = string.IsNullOrWhiteSpace(entry.Scope) ? "global" : entry.Scope;
-                _fileLogWriter.WriteLine($"[{entry.Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{RenderText.GetLogLevelTag(entry.Level)}] [{scope}] {entry.Message}");
-            }
+            Interlocked.Decrement(ref _pendingUiLogCount);
+            _state.LogEntries.Add(entry);
         }
     }
 

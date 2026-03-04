@@ -1,5 +1,5 @@
+using System.Collections.Concurrent;
 using System.Text;
-using System.Threading.Channels;
 using Zeayii.Flow.Presentation.Abstractions;
 using Zeayii.Flow.Presentation.Models;
 using Zeayii.Flow.Presentation.Options;
@@ -14,14 +14,19 @@ namespace Zeayii.Flow.Presentation.Implementations;
 public sealed partial class SpectrePresentationManager : IPresentationManager, ITuiLogSink
 {
     /// <summary>
-    /// 任务事件通道容量。
+    /// 任务事件队列容量。
     /// </summary>
     private const int EventChannelCapacity = 32_768;
 
     /// <summary>
-    /// 日志通道容量。
+    /// 日志队列容量。
     /// </summary>
     private const int LogChannelCapacity = 16_384;
+
+    /// <summary>
+    /// UI 待展示日志容量。
+    /// </summary>
+    private const int PendingUiLogCapacity = 16_384;
 
     /// <summary>
     /// 默认文件日志名前缀。
@@ -49,14 +54,19 @@ public sealed partial class SpectrePresentationManager : IPresentationManager, I
     private readonly PresentationOptions _options;
 
     /// <summary>
-    /// UI 事件通道。
+    /// UI 事件队列。
     /// </summary>
-    private readonly Channel<PresentationEvent> _events;
+    private readonly BlockingCollection<PresentationEvent> _events;
 
     /// <summary>
-    /// 日志通道。
+    /// 日志队列。
     /// </summary>
-    private readonly Channel<LogEntry> _logs;
+    private readonly BlockingCollection<LogEntry> _logs;
+
+    /// <summary>
+    /// 待展示到 UI 的日志队列。
+    /// </summary>
+    private readonly ConcurrentQueue<LogEntry> _pendingUiLogs = new();
 
     /// <summary>
     /// 内部状态容器。
@@ -74,9 +84,24 @@ public sealed partial class SpectrePresentationManager : IPresentationManager, I
     private CancellationTokenSource? _linkedCts;
 
     /// <summary>
-    /// UI 主循环任务。
+    /// UI 线程。
     /// </summary>
-    private Task? _runTask;
+    private Thread? _uiThread;
+
+    /// <summary>
+    /// 日志线程。
+    /// </summary>
+    private Thread? _logThread;
+
+    /// <summary>
+    /// 当前是否已启动。
+    /// </summary>
+    private int _isStarted;
+
+    /// <summary>
+    /// UI 待展示日志当前数量。
+    /// </summary>
+    private int _pendingUiLogCount;
 
     /// <summary>
     /// 文件日志写入器。
@@ -106,20 +131,8 @@ public sealed partial class SpectrePresentationManager : IPresentationManager, I
     {
         _options = options;
         _state = new DashboardState(options.DefaultPageSize);
-        _events = Channel.CreateBounded<PresentationEvent>(new BoundedChannelOptions(EventChannelCapacity)
-        {
-            SingleReader = true,
-            SingleWriter = false,
-            FullMode = BoundedChannelFullMode.Wait,
-            AllowSynchronousContinuations = false
-        });
-        _logs = Channel.CreateBounded<LogEntry>(new BoundedChannelOptions(LogChannelCapacity)
-        {
-            SingleReader = true,
-            SingleWriter = false,
-            FullMode = BoundedChannelFullMode.DropOldest,
-            AllowSynchronousContinuations = false
-        });
+        _events = new BlockingCollection<PresentationEvent>(EventChannelCapacity);
+        _logs = new BlockingCollection<LogEntry>(LogChannelCapacity);
         _state.LogEntries.SetCapacity(_options.MaxLogEntries);
     }
 
@@ -130,13 +143,24 @@ public sealed partial class SpectrePresentationManager : IPresentationManager, I
     /// <returns>完成值任务。</returns>
     public ValueTask StartAsync(CancellationToken ct)
     {
-        if (_runTask is not null)
+        if (Interlocked.Exchange(ref _isStarted, 1) == 1)
         {
             return ValueTask.CompletedTask;
         }
 
         _linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct, _shutdownCts.Token);
-        _runTask = RunDashboardAsync(_linkedCts.Token);
+        _logThread = new Thread(() => RunLogLoop(_linkedCts.Token))
+        {
+            IsBackground = true,
+            Name = "flow-log-thread"
+        };
+        _uiThread = new Thread(() => RunDashboardLoop(_linkedCts.Token))
+        {
+            IsBackground = true,
+            Name = "flow-ui-thread"
+        };
+        _logThread.Start();
+        _uiThread.Start();
         return ValueTask.CompletedTask;
     }
 
@@ -144,18 +168,23 @@ public sealed partial class SpectrePresentationManager : IPresentationManager, I
     /// 停止呈现层主循环。
     /// </summary>
     /// <returns>完成值任务。</returns>
-    public async ValueTask StopAsync()
+    public ValueTask StopAsync()
     {
-        if (_runTask is null)
+        if (Interlocked.Exchange(ref _isStarted, 0) == 0)
         {
-            return;
+            return ValueTask.CompletedTask;
         }
 
-        await _shutdownCts.CancelAsync().ConfigureAwait(false);
-        await _runTask.ConfigureAwait(false);
-        _runTask = null;
+        _shutdownCts.Cancel();
+        _events.CompleteAdding();
+        _logs.CompleteAdding();
+        _uiThread?.Join();
+        _logThread?.Join();
+        _uiThread = null;
+        _logThread = null;
         _linkedCts?.Dispose();
         _linkedCts = null;
+        return ValueTask.CompletedTask;
     }
 
     /// <summary>
@@ -308,7 +337,10 @@ public sealed partial class SpectrePresentationManager : IPresentationManager, I
     /// 追加日志条目。
     /// </summary>
     /// <param name="entry">日志条目。</param>
-    public void AppendLog(LogEntry entry) => _logs.Writer.TryWrite(entry);
+    public void AppendLog(LogEntry entry)
+    {
+        TryAddWithDropOldest(_logs, entry);
+    }
 
     /// <summary>
     /// 将状态事件写入事件通道。
@@ -316,21 +348,30 @@ public sealed partial class SpectrePresentationManager : IPresentationManager, I
     /// <param name="presentationEvent">待写入的状态事件。</param>
     private void EnqueueEvent(PresentationEvent presentationEvent)
     {
-        if (_events.Writer.TryWrite(presentationEvent))
+        TryAddWithDropOldest(_events, presentationEvent);
+    }
+
+    /// <summary>
+    /// 向有界队列追加元素，满时优先丢弃最旧元素，保证业务线程不阻塞。
+    /// </summary>
+    /// <param name="queue">目标队列。</param>
+    /// <param name="item">待写入元素。</param>
+    /// <typeparam name="T">元素类型。</typeparam>
+    private static void TryAddWithDropOldest<T>(BlockingCollection<T> queue, T item)
+    {
+        if (queue.TryAdd(item))
         {
             return;
         }
 
-        var ct = _linkedCts?.Token ?? CancellationToken.None;
-        _events.Writer.WriteAsync(presentationEvent, ct).AsTask().GetAwaiter().GetResult();
+        queue.TryTake(out _);
+        queue.TryAdd(item);
     }
 
     /// <summary>
     /// 初始化文件日志写入器。
     /// </summary>
-    /// <param name="ct">取消令牌。</param>
-    /// <returns>完成任务。</returns>
-    private async Task InitializeFileLoggerAsync(CancellationToken ct)
+    private void InitializeFileLogger()
     {
         if (string.IsNullOrWhiteSpace(_options.LogDirectory) || _options.FileLogLevel == PresentationLogLevel.None)
         {
@@ -352,14 +393,14 @@ public sealed partial class SpectrePresentationManager : IPresentationManager, I
         }
 
         var logFilePath = Path.Combine(_options.LogDirectory, $"{DefaultLogFilePrefix}-{DateTimeOffset.Now:yyyyMMdd-HHmmss}.log");
-        var stream = new FileStream(logFilePath, FileMode.Create, FileAccess.Write, FileShare.Read, 64 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan);
+        var stream = new FileStream(logFilePath, FileMode.Create, FileAccess.Write, FileShare.Read, 64 * 1024, FileOptions.SequentialScan);
         _fileLogWriter = new StreamWriter(stream, new UTF8Encoding(false), 64 * 1024)
         {
             AutoFlush = false,
             NewLine = Environment.NewLine
         };
-        await _fileLogWriter.WriteLineAsync($"# flow log started at {DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss zzz}").ConfigureAwait(false);
-        await _fileLogWriter.FlushAsync(ct).ConfigureAwait(false);
+        _fileLogWriter.WriteLine($"# flow log started at {DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss zzz}");
+        _fileLogWriter.Flush();
     }
 
     /// <summary>
@@ -404,16 +445,15 @@ public sealed partial class SpectrePresentationManager : IPresentationManager, I
     /// <summary>
     /// 刷新并释放文件日志写入器。
     /// </summary>
-    /// <returns>完成任务。</returns>
-    private async Task FlushAndDisposeLoggerAsync()
+    private void FlushAndDisposeLogger()
     {
         if (_fileLogWriter is null)
         {
             return;
         }
 
-        await _fileLogWriter.FlushAsync().ConfigureAwait(false);
-        await _fileLogWriter.DisposeAsync().ConfigureAwait(false);
+        _fileLogWriter.Flush();
+        _fileLogWriter.Dispose();
         _fileLogWriter = null;
     }
 
