@@ -94,9 +94,11 @@ Key rules:
 
 ## 6. Concurrency model
 
-- top-level task concurrency: `TaskConcurrency`
-- per-directory file concurrency: `InnerConcurrency`
-- single-file copy stays async stream-based; no extra internal block concurrency abstraction
+- business execution is sequential: top-level tasks run one by one, and directory files are processed in order
+- no coroutine-style task/file scheduling is used (no queue + worker coroutine orchestration)
+- single-file copy remains async stream-based to preserve upload/download semantics and resume behavior
+- presentation uses two dedicated threads: a `UI thread` for rendering/input and a `log thread` for log aggregation/file writing
+- business publishes to bounded UI/log queues in a non-blocking way; when full, oldest items are dropped to avoid back-pressure on the business path
 
 ## 7. Recovery model
 

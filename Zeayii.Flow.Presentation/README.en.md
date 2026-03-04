@@ -34,22 +34,26 @@
 ```mermaid
 sequenceDiagram
     participant Core as Core
-    participant EVT as Event Channel
-    participant LOG as Log Channel
-    participant UI as SpectrePresentationManager
+    participant EVT as Event Queue
+    participant LOG as Log Queue
+    participant LTH as Log Thread
+    participant UTH as UI Thread
     participant STA as DashboardState
 
-    Core->>EVT: task/file/progress events
-    Core->>LOG: log entries
-    UI->>EVT: drain events
-    UI->>LOG: drain logs
-    UI->>STA: update single-writer state
-    UI->>UI: render current frame
+    Core->>EVT: push task/file/progress events
+    Core->>LOG: push log entries
+    LTH->>LOG: consume logs
+    LTH->>UTH: forward ui-visible logs
+    UTH->>EVT: consume events
+    UTH->>STA: update single-writer state
+    UTH->>UTH: render current frame
 ```
 
 ## 5. Design constraints
 
 - UI state must stay single-writer
+- UI and logging run on dedicated threads with separated responsibilities
+- business publishes to UI/log queues in a non-blocking way to avoid back-pressure
 - left and middle columns are fixed-width
 - right column is adaptive
 - counts, rates and elapsed time should minimize visual jitter

@@ -28,7 +28,7 @@ public sealed class TaskTransferEngine
 
         using var global = new GlobalContext(ui, options, ct);
         var hasFailures = false;
-        global.LogInformation("engine", $"Run started. tasks={tasks.Count}, task-concurrency={options.TaskConcurrency}, inner-concurrency={options.InnerConcurrency}, retries={options.MaxRetries}, policy={options.TaskFailurePolicy}.");
+        global.LogInformation("Engine", $"Run started. tasks={tasks.Count}, task-concurrency={options.TaskConcurrency}, inner-concurrency={options.InnerConcurrency}, retries={options.MaxRetries}, policy={options.TaskFailurePolicy}.");
 
         foreach (var request in tasks)
         {
@@ -36,7 +36,7 @@ public sealed class TaskTransferEngine
             var descriptor = TaskDescriptorFactory.Create(request, DateTimeOffset.UtcNow);
             ui.RegisterTask(descriptor);
             ui.UpdateTaskStatus(descriptor.TaskId, TaskStatus.Pending);
-            global.LogDebug("engine", $"Task registered. id={descriptor.TaskId}, kind={descriptor.Kind}, src={request.SourcePath}, dst={request.DestinationPath}.");
+            global.LogDebug("Engine", $"Task registered. id={descriptor.TaskId}, kind={descriptor.Kind}, src={request.SourcePath}, dst={request.DestinationPath}.");
 
             var runtime = new TaskRuntime(global, descriptor, request);
             var success = await runtime.RunAsync().ConfigureAwait(false);
@@ -50,7 +50,7 @@ public sealed class TaskTransferEngine
             }
         }
 
-        global.LogInformation("engine", hasFailures ? "Run finished with failures." : "Run finished successfully.");
+        global.LogInformation("Engine", hasFailures ? "Run finished with failures." : "Run finished successfully.");
         return hasFailures ? 1 : 0;
     }
 }

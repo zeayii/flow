@@ -70,11 +70,13 @@ internal sealed class GlobalContext(IPresentationManager ui, CoreOptions options
     /// </summary>
     public void CancelAll()
     {
-        if (!_globalCancellationSource.IsCancellationRequested)
+        if (_globalCancellationSource.IsCancellationRequested)
         {
-            LogWarning("global", "Global cancellation requested.");
-            _globalCancellationSource.Cancel();
+            return;
         }
+
+        LogWarning("Global", "Global cancellation requested.");
+        _globalCancellationSource.Cancel();
     }
 
     /// <summary>
@@ -118,4 +120,3 @@ internal sealed class GlobalContext(IPresentationManager ui, CoreOptions options
         _globalCancellationSource.Dispose();
     }
 }
-

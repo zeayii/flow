@@ -27,6 +27,7 @@ Flow 是一个面向 `网盘映射目录 <-> 本地媒体目录` 场景的模块
 - 基于 TUI Dashboard 的运行时观测模型
 - 基于策略的冲突处理与失败处理模型
 - 基于 `Global -> Task -> File` 的单向取消模型
+- 基于“业务顺序执行 + UI线程/日志线程隔离”的线程模型
 
 ## 2. 工程定位
 
@@ -58,7 +59,7 @@ sequenceDiagram
     CLI->>OPTS: parse cli and build app options
     OPTS->>ENG: build core options and task requests
     CLI->>UI: start dashboard
-    ENG->>RUN: schedule top-level tasks
+    ENG->>RUN: run tasks sequentially
     RUN->>CAP: stream copy / resume / finalize
     CAP-->>RUN: file outcome
     RUN->>UI: task progress + file progress + logs

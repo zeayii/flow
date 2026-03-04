@@ -30,7 +30,7 @@ What to do:
 
 - do not judge the engine from short-term speed swings alone
 - correlate with file logs and final outcomes
-- reduce concurrency and observe whether stability improves
+- tune block size, task split granularity and mount-layer parameters before judging stability
 
 ## 3. TUI exit behavior looks odd on some terminals
 

@@ -28,6 +28,7 @@ For that reason Flow uses:
 - TUI dashboard observability
 - explicit conflict and failure policies
 - a downward-only `Global -> Task -> File` cancellation model
+- a thread model of sequential business execution plus isolated UI/log threads
 
 ## 2. Project role
 
@@ -59,7 +60,7 @@ sequenceDiagram
     CLI->>OPTS: parse cli and build app options
     OPTS->>ENG: build core options and task requests
     CLI->>UI: start dashboard
-    ENG->>RUN: schedule top-level tasks
+    ENG->>RUN: run tasks sequentially
     RUN->>CAP: stream copy / resume / finalize
     CAP-->>RUN: file outcome
     RUN->>UI: task progress + file progress + logs
