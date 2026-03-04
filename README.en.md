@@ -55,7 +55,7 @@ sequenceDiagram
     participant CAP as FileTransferCapability
     participant UI as Presentation
 
-    User->>CLI: flow plan.json [options]
+    User->>CLI: run flow with plan
     CLI->>OPT: parse CLI + build ApplicationOptions
     OPT->>ENG: build CoreOptions / TaskRequest list
     CLI->>UI: start dashboard
@@ -154,11 +154,11 @@ The footer keeps key bindings visible, and the detail page supports full scrolli
 ## 8. Common commands
 
 ```bash
-dotnet build Zeayii.Flow.slnx -v minimal
+dotnet build Zeayii.Flow.sln -v minimal
 ```
 
 ```bash
-dotnet test Zeayii.Flow.slnx -v minimal
+dotnet test Zeayii.Flow.sln -v minimal
 ```
 
 ```bash
@@ -184,8 +184,8 @@ dotnet publish Zeayii.Flow.CommandLine/Zeayii.Flow.CommandLine.csproj -c Release
 
 ## 10. Release checklist
 
-- `dotnet build Zeayii.Flow.slnx -v minimal` passes
-- `dotnet test Zeayii.Flow.slnx -v minimal` passes
+- `dotnet build Zeayii.Flow.sln -v minimal` passes
+- `dotnet test Zeayii.Flow.sln -v minimal` passes
 - `--dry-run` and real execution smoke tests pass
 - `Resume / Overwrite / Rename` semantics are verified
 - dashboard layout, scrolling and detail page are usable

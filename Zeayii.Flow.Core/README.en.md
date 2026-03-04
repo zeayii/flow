@@ -32,7 +32,7 @@ sequenceDiagram
 
     ENG->>RUN: run task
     RUN->>PRG: create task progress sink
-    RUN->>CAP: copy file / enumerate directory
+    RUN->>CAP: copy file or enumerate directory
     CAP->>PRG: report bytes
     RUN->>UI: report task + file state
     CAP-->>RUN: file outcome

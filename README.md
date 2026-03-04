@@ -54,7 +54,7 @@ sequenceDiagram
     participant CAP as FileTransferCapability
     participant UI as Presentation
 
-    User->>CLI: flow plan.json [options]
+    User->>CLI: run flow with plan
     CLI->>OPT: parse CLI + build ApplicationOptions
     OPT->>ENG: build CoreOptions / TaskRequest list
     CLI->>UI: start dashboard
@@ -153,11 +153,11 @@ Flow 的主界面采用三列布局：
 ## 8. 常用命令
 
 ```bash
-dotnet build Zeayii.Flow.slnx -v minimal
+dotnet build Zeayii.Flow.sln -v minimal
 ```
 
 ```bash
-dotnet test Zeayii.Flow.slnx -v minimal
+dotnet test Zeayii.Flow.sln -v minimal
 ```
 
 ```bash
@@ -183,8 +183,8 @@ dotnet publish Zeayii.Flow.CommandLine/Zeayii.Flow.CommandLine.csproj -c Release
 
 ## 10. 发布检查清单
 
-- `dotnet build Zeayii.Flow.slnx -v minimal` 通过
-- `dotnet test Zeayii.Flow.slnx -v minimal` 通过
+- `dotnet build Zeayii.Flow.sln -v minimal` 通过
+- `dotnet test Zeayii.Flow.sln -v minimal` 通过
 - `--dry-run` 与真实执行路径烟测通过
 - `Resume / Overwrite / Rename` 语义符合预期
 - Dashboard 布局、滚动、详情页可用

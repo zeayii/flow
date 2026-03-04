@@ -32,13 +32,13 @@ sequenceDiagram
     participant LDR as JsonFileLoader
     participant ENG as TaskTransferEngine
 
-    User->>CLI: sync plan.json [options]
+    User->>CLI: run flow with plan
     CLI->>LOC: configure culture
     CLI->>LDR: load plan.json
     CLI->>OPT: build options
     CLI->>ENG: run tasks
     ENG-->>CLI: exit code
-    CLI-->>User: console / TUI
+    CLI-->>User: console or tui
 ```
 
 ## 4. Localization rules
