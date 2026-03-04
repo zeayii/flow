@@ -26,7 +26,7 @@ public sealed partial class SpectrePresentationManager : IPresentationManager, I
     /// <summary>
     /// 默认文件日志名前缀。
     /// </summary>
-    private const string DefaultLogFilePrefix = "sync";
+    private const string DefaultLogFilePrefix = "flow";
 
     /// <summary>
     /// 窗口尺寸重布局防抖时长。
@@ -358,7 +358,7 @@ public sealed partial class SpectrePresentationManager : IPresentationManager, I
             AutoFlush = false,
             NewLine = Environment.NewLine
         };
-        await _fileLogWriter.WriteLineAsync($"# sync log started at {DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss zzz}").ConfigureAwait(false);
+        await _fileLogWriter.WriteLineAsync($"# flow log started at {DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss zzz}").ConfigureAwait(false);
         await _fileLogWriter.FlushAsync(ct).ConfigureAwait(false);
     }
 

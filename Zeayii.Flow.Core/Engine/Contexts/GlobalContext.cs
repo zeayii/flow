@@ -18,6 +18,12 @@ internal sealed class GlobalContext(IPresentationManager ui, CoreOptions options
     /// </summary>
     private readonly CancellationTokenSource _globalCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
+    /// <summary>
+    /// 可选日志输入接口。
+    /// 说明：当 UI 实现了 <see cref="ITuiLogSink"/> 时，Core 会输出结构化运行日志。
+    /// </summary>
+    private readonly ITuiLogSink? _logSink = ui as ITuiLogSink;
+
 
     /// <summary>
     /// 展示层管理器。
@@ -66,9 +72,45 @@ internal sealed class GlobalContext(IPresentationManager ui, CoreOptions options
     {
         if (!_globalCancellationSource.IsCancellationRequested)
         {
+            LogWarning("global", "Global cancellation requested.");
             _globalCancellationSource.Cancel();
         }
     }
+
+    /// <summary>
+    /// 输出 Trace 级别日志。
+    /// </summary>
+    /// <param name="scope">日志作用域。</param>
+    /// <param name="message">日志消息。</param>
+    public void LogTrace(string scope, string message) => _logSink?.Trace(message, scope);
+
+    /// <summary>
+    /// 输出 Debug 级别日志。
+    /// </summary>
+    /// <param name="scope">日志作用域。</param>
+    /// <param name="message">日志消息。</param>
+    public void LogDebug(string scope, string message) => _logSink?.Debug(message, scope);
+
+    /// <summary>
+    /// 输出 Information 级别日志。
+    /// </summary>
+    /// <param name="scope">日志作用域。</param>
+    /// <param name="message">日志消息。</param>
+    public void LogInformation(string scope, string message) => _logSink?.Information(message, scope);
+
+    /// <summary>
+    /// 输出 Warning 级别日志。
+    /// </summary>
+    /// <param name="scope">日志作用域。</param>
+    /// <param name="message">日志消息。</param>
+    public void LogWarning(string scope, string message) => _logSink?.Warning(message, scope);
+
+    /// <summary>
+    /// 输出 Error 级别日志。
+    /// </summary>
+    /// <param name="scope">日志作用域。</param>
+    /// <param name="message">日志消息。</param>
+    public void LogError(string scope, string message) => _logSink?.Error(message, scope);
 
     /// <inheritdoc />
     public void Dispose()

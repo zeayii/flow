@@ -28,8 +28,8 @@ internal static class DryRunExecutor
         ITuiLogSink? logSink,
         CancellationToken ct)
     {
-        logSink?.Information("Dry-run preview mode enabled. No file operation will be executed.");
-        logSink?.Information($"Loaded {tasks.Count} tasks for preview.");
+        logSink?.Information("Dry-run preview mode enabled. No file operation will be executed.", "dry-run");
+        logSink?.Information($"Loaded {tasks.Count} tasks for preview.", "dry-run");
 
         foreach (var task in tasks)
         {
@@ -93,7 +93,7 @@ internal static class DryRunExecutor
         ui.ReportTaskSpeed(descriptor.TaskId, 0);
         ui.ReportFolderCounters(descriptor.TaskId, 0, 1, 0);
         ui.ReportFileProgress(descriptor.TaskId, relativePath, 0, fileLength, 0);
-        logSink?.Debug($"Prepared file preview: {descriptor.SourcePath}", descriptor.DisplayName);
+        logSink?.Debug($"Prepared file preview: {descriptor.SourcePath}", "dry-run");
     }
 
     /// <summary>
@@ -142,7 +142,7 @@ internal static class DryRunExecutor
         ui.ReportFolderCounters(descriptor.TaskId, 0, filesTotal, 0);
         ui.ReportTaskProgress(descriptor.TaskId, 0, totalBytes);
         ui.ReportTaskSpeed(descriptor.TaskId, 0);
-        logSink?.Debug($"Prepared directory preview with {filesTotal} files.", descriptor.DisplayName);
+        logSink?.Debug($"Prepared directory preview with {filesTotal} files.", "dry-run");
     }
 }
 

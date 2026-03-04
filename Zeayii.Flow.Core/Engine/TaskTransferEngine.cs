@@ -29,6 +29,7 @@ public sealed class TaskTransferEngine
 
         using var global = new GlobalContext(ui, options, ct);
         var tracker = new TaskOutcomeTracker();
+        global.LogInformation("engine", $"Run started. tasks={tasks.Count}, task-concurrency={options.TaskConcurrency}, inner-concurrency={options.InnerConcurrency}, retries={options.MaxRetries}, policy={options.TaskFailurePolicy}.");
 
         var taskQueue = Channel.CreateBounded<TaskWorkItem>(new BoundedChannelOptions(GetTaskQueueCapacity(options.TaskConcurrency))
         {
@@ -42,6 +43,7 @@ public sealed class TaskTransferEngine
             var descriptor = TaskDescriptorFactory.Create(request, DateTimeOffset.UtcNow);
             ui.RegisterTask(descriptor);
             ui.UpdateTaskStatus(descriptor.TaskId, TaskStatus.Pending);
+            global.LogDebug("engine", $"Task registered. id={descriptor.TaskId}, kind={descriptor.Kind}, src={request.SourcePath}, dst={request.DestinationPath}.");
             await taskQueue.Writer.WriteAsync(new TaskWorkItem(request, descriptor), ct);
         }
 
@@ -55,7 +57,7 @@ public sealed class TaskTransferEngine
         }
 
         await Task.WhenAll(workers);
-
+        global.LogInformation("engine", tracker.HasFailures ? "Run finished with failures." : "Run finished successfully.");
         return tracker.HasFailures ? 1 : 0;
     }
 

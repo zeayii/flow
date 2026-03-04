@@ -63,6 +63,7 @@ internal sealed class TaskRuntime
             _global.Options.MaxRetries,
             _global.Options.InnerConcurrency,
             new TaskRuntimeState(new SpeedMeter()));
+        _global.LogInformation(_descriptor.DisplayName, $"Task started. id={_descriptor.TaskId}, kind={_descriptor.Kind}.");
 
         try
         {
@@ -76,6 +77,7 @@ internal sealed class TaskRuntime
                 return await ExecuteDirectoryTaskAsync(context).ConfigureAwait(false);
             }
 
+            _global.LogError(_descriptor.DisplayName, $"Source not found. src={_request.SourcePath}");
             _global.Ui.UpdateTaskStatus(_descriptor.TaskId, TaskStatus.Failed, "Source not found.");
             _global.Ui.ReportTaskFailed(_descriptor.TaskId, "Source not found.");
             return false;
@@ -83,6 +85,7 @@ internal sealed class TaskRuntime
         catch (OperationCanceledException) when (context.IsCanceledByFailure)
         {
             var message = "Task canceled by failure policy.";
+            _global.LogWarning(_descriptor.DisplayName, message);
             _global.Ui.ReportTaskFailed(_descriptor.TaskId, message);
             _global.Ui.UpdateTaskStatus(_descriptor.TaskId, TaskStatus.Failed, message);
             return false;
@@ -90,6 +93,7 @@ internal sealed class TaskRuntime
         catch (OperationCanceledException)
         {
             var message = "Canceled.";
+            _global.LogWarning(_descriptor.DisplayName, message);
             _global.Ui.UpdateTaskStatus(_descriptor.TaskId, TaskStatus.Canceled, message);
             return false;
         }
@@ -114,6 +118,7 @@ internal sealed class TaskRuntime
         executionContext.Global.Ui.UpdateFileStatus(taskId, relativePath, FileItemStatus.Pending);
         executionContext.Global.Ui.ReportFolderCounters(taskId, executionContext.State.FilesDone, executionContext.State.FilesTotal, executionContext.State.FailedFiles);
         executionContext.Global.Ui.UpdateTaskStatus(taskId, TaskStatus.Running);
+        executionContext.Global.LogInformation(executionContext.Descriptor.DisplayName, $"File transfer started. path={relativePath}, bytes={fileLength}.");
 
         using var fileContext = new FileExecutionContext(executionContext, workItem);
         var fileProgress = new FileProgressSink(fileContext, relativePath, fileLength, ProgressInterval, SpeedReportInterval);
@@ -142,11 +147,13 @@ internal sealed class TaskRuntime
             executionContext.Global.Ui.ReportFolderCounters(taskId, executionContext.State.FilesDone, executionContext.State.FilesTotal, executionContext.State.FailedFiles);
             if (result.AlreadyCompleted)
             {
+                executionContext.Global.LogInformation(executionContext.Descriptor.DisplayName, $"File skipped. path={workItem.RelativePath}, reason=already-up-to-date.");
                 executionContext.Global.Ui.ReportFileSkipped(taskId, workItem.RelativePath, "Already up to date.");
                 executionContext.Global.Ui.UpdateTaskStatus(taskId, TaskStatus.Skipped, "Already up to date.");
             }
             else
             {
+                executionContext.Global.LogInformation(executionContext.Descriptor.DisplayName, $"File completed. path={workItem.RelativePath}, bytes={result.Bytes}.");
                 executionContext.Global.Ui.ReportFileCompleted(taskId, workItem.RelativePath, result.Bytes);
                 executionContext.Global.Ui.ReportTaskCompleted(taskId);
                 executionContext.Global.Ui.UpdateTaskStatus(taskId, TaskStatus.Completed);
@@ -157,6 +164,7 @@ internal sealed class TaskRuntime
 
         executionContext.State.IncrementFailedFiles();
         executionContext.Global.Ui.ReportFolderCounters(taskId, executionContext.State.FilesDone, executionContext.State.FilesTotal, executionContext.State.FailedFiles);
+        executionContext.Global.LogError(executionContext.Descriptor.DisplayName, $"File failed. path={workItem.RelativePath}, category={result.ErrorCategory ?? "Unknown"}, attempts={result.Attempts}, message={result.ErrorMessage ?? "Failed"}.");
         executionContext.Global.Ui.ReportFileFailed(taskId, workItem.RelativePath, result.ErrorCategory ?? "Unknown", result.ErrorMessage ?? "Failed", result.Attempts);
         executionContext.Global.Ui.ReportTaskFailed(taskId, result.ErrorMessage ?? "Failed");
         executionContext.Global.Ui.UpdateTaskStatus(taskId, TaskStatus.Failed, result.ErrorMessage);
@@ -176,6 +184,7 @@ internal sealed class TaskRuntime
         var bufferSize = Math.Max(4 * 1024, executionContext.Global.Options.BlockSize * 1024);
 
         executionContext.Global.Ui.UpdateTaskStatus(taskId, TaskStatus.Scanning);
+        executionContext.Global.LogInformation(executionContext.Descriptor.DisplayName, $"Directory scan started. src={_request.SourcePath}.");
 
         var fileQueue = Channel.CreateBounded<FileTransferWorkItem>(new BoundedChannelOptions(GetFileQueueCapacity(executionContext.InnerConcurrency))
         {
@@ -214,6 +223,7 @@ internal sealed class TaskRuntime
                 await resultQueue.Writer.WriteAsync(FileResultEvent.Discovered(relativePath, fileLength), executionContext.TaskCancellationToken).ConfigureAwait(false);
                 await fileQueue.Writer.WriteAsync(new FileTransferWorkItem(filePath, destinationPath, relativePath), executionContext.TaskCancellationToken).ConfigureAwait(false);
             }
+            executionContext.Global.LogInformation(executionContext.Descriptor.DisplayName, $"Directory scan finished. discovered={executionContext.State.FilesTotal}.");
         }
         finally
         {
@@ -234,11 +244,13 @@ internal sealed class TaskRuntime
 
         if (aggregateResult.WasCanceled)
         {
+            executionContext.Global.LogWarning(executionContext.Descriptor.DisplayName, $"Task canceled. reason={aggregateResult.Message}");
             throw new OperationCanceledException(executionContext.TaskCancellationToken);
         }
 
         if (aggregateResult.HasFailures && executionContext.Global.Options.TaskFailurePolicy != TaskFailurePolicy.Continue)
         {
+            executionContext.Global.LogError(executionContext.Descriptor.DisplayName, $"Task failed by policy. message={aggregateResult.Message}");
             executionContext.Global.Ui.ReportTaskFailed(taskId, aggregateResult.Message);
             executionContext.Global.Ui.UpdateTaskStatus(taskId, TaskStatus.Failed, aggregateResult.Message);
             return false;
@@ -246,6 +258,7 @@ internal sealed class TaskRuntime
 
         if (aggregateResult.HasFailures)
         {
+            executionContext.Global.LogWarning(executionContext.Descriptor.DisplayName, $"Task completed with errors. message={aggregateResult.Message}");
             executionContext.Global.Ui.ReportTaskFailed(taskId, aggregateResult.Message);
             executionContext.Global.Ui.UpdateTaskStatus(taskId, TaskStatus.CompletedWithErrors, aggregateResult.Message);
             return true;
@@ -253,10 +266,12 @@ internal sealed class TaskRuntime
 
         if (aggregateResult.AllSkipped)
         {
+            executionContext.Global.LogInformation(executionContext.Descriptor.DisplayName, "Task skipped. all files already up to date.");
             executionContext.Global.Ui.UpdateTaskStatus(taskId, TaskStatus.Skipped, "Already up to date.");
             return true;
         }
 
+        executionContext.Global.LogInformation(executionContext.Descriptor.DisplayName, "Task completed.");
         executionContext.Global.Ui.ReportTaskCompleted(taskId);
         executionContext.Global.Ui.UpdateTaskStatus(taskId, TaskStatus.Completed);
         return true;
@@ -394,6 +409,7 @@ internal sealed class TaskRuntime
                     finalizedRelativePaths.Add(resultEvent.RelativePath);
                     executionContext.State.IncrementFailedFiles();
                     progress.ReportFolderCounters(executionContext.State.FilesDone, executionContext.State.FilesTotal, executionContext.State.FailedFiles);
+                    executionContext.Global.LogError(executionContext.Descriptor.DisplayName, $"File failed. path={resultEvent.RelativePath}, category={resultEvent.ErrorCategory ?? "Unknown"}, attempts={resultEvent.Attempts}, message={resultEvent.ErrorMessage ?? "Failed"}.");
                     executionContext.Global.Ui.ReportFileFailed(
                         executionContext.Descriptor.TaskId,
                         resultEvent.RelativePath,
@@ -475,9 +491,11 @@ internal sealed class TaskRuntime
         switch (executionContext.Global.Options.TaskFailurePolicy)
         {
             case TaskFailurePolicy.StopCurrentTask:
+                executionContext.Global.LogWarning(executionContext.Descriptor.DisplayName, "Failure policy triggered: StopCurrentTask.");
                 executionContext.CancelTaskByFailure();
                 break;
             case TaskFailurePolicy.StopAll:
+                executionContext.Global.LogWarning(executionContext.Descriptor.DisplayName, "Failure policy triggered: StopAll.");
                 executionContext.CancelTaskByFailure();
                 executionContext.Global.CancelAll();
                 break;

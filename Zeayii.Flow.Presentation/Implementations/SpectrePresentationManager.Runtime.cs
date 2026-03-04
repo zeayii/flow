@@ -260,8 +260,8 @@ public sealed partial class SpectrePresentationManager
 
             if (_fileLogWriter is not null && entry.Level >= _options.FileLogLevel)
             {
-                var scope = string.IsNullOrWhiteSpace(entry.Scope) ? string.Empty : $" ({entry.Scope})";
-                _fileLogWriter.WriteLine($"[{entry.Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{RenderText.GetLogLevelTag(entry.Level)}]{scope} {entry.Message}");
+                var scope = string.IsNullOrWhiteSpace(entry.Scope) ? "global" : entry.Scope;
+                _fileLogWriter.WriteLine($"[{entry.Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{RenderText.GetLogLevelTag(entry.Level)}] [{scope}] {entry.Message}");
             }
         }
     }

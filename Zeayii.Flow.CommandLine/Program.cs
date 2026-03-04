@@ -275,7 +275,7 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
 
         if (!appOptions.PlanPath.Exists)
         {
-            ConsoleOutput.WriteErrorLine($"Plan file not found: {appOptions.PlanPath.FullName}");
+            ConsoleOutput.WriteErrorLine("CommandLine", $"Plan file not found: {appOptions.PlanPath.FullName}");
             return 1;
         }
 
@@ -283,6 +283,10 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
         var coreOptions = OptionsBuilder.BuildCoreOptions(appOptions);
         var presentationOptions = OptionsBuilder.BuildPresentationOptions(appOptions);
         var tasks = OptionsBuilder.ToTaskRequests(appOptions, plans);
+        if (!appOptions.EnableTui)
+        {
+            ConsoleOutput.WriteInfoLine("CommandLine", $"Loaded plan. tasks={tasks.Count}, task-concurrency={coreOptions.TaskConcurrency}, inner-concurrency={coreOptions.InnerConcurrency}, retries={coreOptions.MaxRetries}, failure-policy={coreOptions.TaskFailurePolicy}.");
+        }
 
         var services = new ServiceCollection();
         services.AddSingleton(coreOptions);
@@ -313,6 +317,7 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
             {
                 if (!appOptions.EnableTui)
                 {
+                    ConsoleOutput.WriteInfoLine("Dry Run", "Preview mode enabled. No file operation will be executed.");
                     DryRunExecutor.PrintConsolePreview(tasks, appOptions);
                     return 0;
                 }
@@ -328,7 +333,13 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
                 }
             }
 
-            return await engine.RunAsync(tasks, ui, coreOptions, cancellationToken);
+            var exitCode = await engine.RunAsync(tasks, ui, coreOptions, cancellationToken);
+            if (!appOptions.EnableTui)
+            {
+                ConsoleOutput.WriteInfoLine("CommandLine", exitCode == 0 ? "Run finished successfully." : $"Run finished with failures. exit={exitCode}.");
+            }
+
+            return exitCode;
         }
         finally
         {
@@ -340,16 +351,17 @@ rootCommand.SetAction(async (parseResult, cancellationToken) =>
     }
     catch (OperationCanceledException)
     {
+        ConsoleOutput.WriteWarningLine("CommandLine", "Operation canceled.");
         return 1;
     }
     catch (JsonException ex)
     {
-        ConsoleOutput.WriteErrorLine($"Invalid plan file: {ex.Message}");
+        ConsoleOutput.WriteErrorLine("CommandLine", $"Invalid plan file: {ex.Message}");
         return 2;
     }
     catch (Exception ex)
     {
-        ConsoleOutput.WriteErrorLine(ex.Message);
+        ConsoleOutput.WriteErrorLine("CommandLine", ex.Message);
         return 3;
     }
 });

@@ -144,7 +144,7 @@ public sealed partial class SpectrePresentationManager
         return new Panel(table)
         {
             Border = BoxBorder.Rounded,
-            Header = new PanelHeader(string.IsNullOrWhiteSpace(_options.HeaderRunModeText) ? " Flow Dashboard " : $" Flow Dashboard - {Markup.Escape(_options.HeaderRunModeText)} "),
+            Header = new PanelHeader(string.IsNullOrWhiteSpace(_options.HeaderRunModeText) ? " Zeayii Flow " : $" Zeayii Flow - {Markup.Escape(_options.HeaderRunModeText)} "),
             Width = width,
             Padding = new Padding(1, 0, 1, 0)
         };
@@ -346,7 +346,7 @@ public sealed partial class SpectrePresentationManager
         {
             var prefix = $"{entry.Timestamp:HH:mm:ss} [{RenderText.GetLogLevelTag(entry.Level)}]";
             var prefixWidth = RenderText.GetDisplayWidth(prefix);
-            var message = string.IsNullOrWhiteSpace(entry.Scope) ? entry.Message : $"({entry.Scope}) {entry.Message}";
+            var message = string.IsNullOrWhiteSpace(entry.Scope) ? "[global] " + entry.Message : $"[{entry.Scope}] {entry.Message}";
             rows.Add(new Markup($"[grey]{Markup.Escape(prefix)}[/] [{RenderText.GetLogLevelColorName(entry.Level)}]{Markup.Escape(RenderText.TruncateAndPad(message, Math.Max(4, contentWidth - prefixWidth - 1)))}[/]"));
         }
 
@@ -715,5 +715,4 @@ public sealed partial class SpectrePresentationManager
         public List<string> TaskNames { get; } = [];
     }
 }
-
 
