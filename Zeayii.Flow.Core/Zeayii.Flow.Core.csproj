@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ======================================================
+       Zeayii.Flow.Core
+       运行时核心：负责任务执行、策略控制、异步流复制与取消传播
+       ====================================================== -->
+
+  <!-- ======================================================
+       程序集与仓库元数据
+       ====================================================== -->
+  <PropertyGroup>
+    <AssemblyName>Zeayii.Flow.Core</AssemblyName>
+    <RootNamespace>Zeayii.Flow.Core</RootNamespace>
+    <Version>0.0.1</Version>
+    <AssemblyVersion>0.0.0.1</AssemblyVersion>
+    <FileVersion>0.0.0.1</FileVersion>
+    <Authors>Master</Authors>
+    <Company>Zeayii</Company>
+    <Product>Zeayii.Flow</Product>
+    <Description>Flow core runtime for mapped cloud-drive synchronization.</Description>
+    <RepositoryUrl>https://github.com/zeayii/flow</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- ======================================================
+       基础编译配置
+       ====================================================== -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!-- Core 作为类库，需要尽可能维持裁剪友好。 -->
+    <TrimMode>full</TrimMode>
+    <IsTrimmable>true</IsTrimmable>
+
+    <!-- 类库默认不依赖多语言资源，允许使用不变式全局化。 -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <IlcDisableReflection>false</IlcDisableReflection>
+
+    <!-- 为三平台构建链显式声明 RID，便于上层 AOT 发布时传播。 -->
+    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <!-- ======================================================
+       项目引用
+       ====================================================== -->
+  <ItemGroup>
+    <ProjectReference Include="..\Zeayii.Flow.Presentation\Zeayii.Flow.Presentation.csproj" />
+  </ItemGroup>
+
+</Project>

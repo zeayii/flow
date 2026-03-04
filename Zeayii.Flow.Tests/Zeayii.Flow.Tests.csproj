@@ -1,0 +1,65 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ======================================================
+       Zeayii.Flow.Tests
+       测试层：负责排序、文本渲染、日志缓冲、配置映射与取消语义验证
+       ====================================================== -->
+
+  <!-- ======================================================
+       程序集与仓库元数据
+       ====================================================== -->
+  <PropertyGroup>
+    <AssemblyName>Zeayii.Flow.Tests</AssemblyName>
+    <RootNamespace>Zeayii.Flow.Tests</RootNamespace>
+    <Version>0.0.1</Version>
+    <AssemblyVersion>0.0.0.1</AssemblyVersion>
+    <FileVersion>0.0.0.1</FileVersion>
+    <Authors>Master</Authors>
+    <Company>Zeayii</Company>
+    <Product>Zeayii.Flow</Product>
+    <Description>Automated tests for Zeayii.Flow.</Description>
+    <RepositoryUrl>https://github.com/zeayii/flow</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+
+    <!-- 测试项目不参与 AOT 发布。 -->
+    <PublishAot>false</PublishAot>
+  </PropertyGroup>
+
+  <!-- ======================================================
+       测试依赖
+       ====================================================== -->
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- ======================================================
+       全局 using
+       ====================================================== -->
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <!-- ======================================================
+       项目引用
+       ====================================================== -->
+  <ItemGroup>
+    <ProjectReference Include="..\Zeayii.Flow.Core\Zeayii.Flow.Core.csproj" />
+    <ProjectReference Include="..\Zeayii.Flow.Presentation\Zeayii.Flow.Presentation.csproj" />
+    <ProjectReference Include="..\Zeayii.Flow.CommandLine\Zeayii.Flow.CommandLine.csproj" />
+  </ItemGroup>
+
+</Project>

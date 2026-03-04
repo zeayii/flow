@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value></resheader>
+  <data name="RootDescription" xml:space="preserve"><value>Flow command line interface.</value></data>
+  <data name="PlanArgumentDescription" xml:space="preserve"><value>Tasks descriptor json file path.</value></data>
+  <data name="TaskConcurrencyDescription" xml:space="preserve"><value>Task concurrency.</value></data>
+  <data name="SubtaskConcurrencyDescription" xml:space="preserve"><value>Inner file concurrency within a directory.</value></data>
+  <data name="RetryAttemptsDescription" xml:space="preserve"><value>Maximum retry attempts per file.</value></data>
+  <data name="BlockSizeDescription" xml:space="preserve"><value>Buffer size in KiB.</value></data>
+  <data name="ConflictPolicyDescription" xml:space="preserve"><value>Conflict policy: resume, overwrite, rename.</value></data>
+  <data name="TaskFailurePolicyDescription" xml:space="preserve"><value>Task failure policy: Continue, StopCurrentTask, StopAll.</value></data>
+  <data name="DryRunDescription" xml:space="preserve"><value>Print the resolved plan without executing.</value></data>
+  <data name="NoUiDescription" xml:space="preserve"><value>Disable text UI (enabled by default).</value></data>
+  <data name="UiRefreshDescription" xml:space="preserve"><value>UI refresh interval (milliseconds).</value></data>
+  <data name="UiLogTailDescription" xml:space="preserve"><value>Tail log area height (rows).</value></data>
+  <data name="UiLogMaxDescription" xml:space="preserve"><value>Maximum in-memory log entries.</value></data>
+  <data name="UiLogLevelDescription" xml:space="preserve"><value>Presentation log level.</value></data>
+  <data name="LogDirectoryDescription" xml:space="preserve"><value>Directory for file logs.</value></data>
+  <data name="FileLogLevelDescription" xml:space="preserve"><value>File log level (None disables file logging).</value></data>
+  <data name="UiFailMaxDescription" xml:space="preserve"><value>Maximum failed entries retained per task.</value></data>
+  <data name="UiDoneMaxDescription" xml:space="preserve"><value>Maximum recent completed files retained per folder task.</value></data>
+  <data name="UiTaskMaxDescription" xml:space="preserve"><value>Maximum in-memory tasks retained by TUI.</value></data>
+  <data name="UiPageSizeDescription" xml:space="preserve"><value>Default page size when terminal height is unavailable.</value></data>
+  <data name="UiFailShowDescription" xml:space="preserve"><value>Visible failed entries count in detail view.</value></data>
+  <data name="UiDoneShowDescription" xml:space="preserve"><value>Visible recent completed files count in detail view.</value></data>
+  <data name="LangDescription" xml:space="preserve"><value>UI language in BCP 47 tags. Supported: en-US, zh-CN, zh-TW, ja-JP, ko-KR.</value></data>
+  <data name="ValidationGreaterThanZero" xml:space="preserve"><value>must be greater than zero.</value></data>
+</root>
+
+

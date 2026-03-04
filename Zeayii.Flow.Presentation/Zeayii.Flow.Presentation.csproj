@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ======================================================
+       Zeayii.Flow.Presentation
+       控制台展示层：负责 Dashboard、日志视图、详情页与输入分发
+       ====================================================== -->
+
+  <!-- ======================================================
+       程序集与仓库元数据
+       ====================================================== -->
+  <PropertyGroup>
+    <AssemblyName>Zeayii.Flow.Presentation</AssemblyName>
+    <RootNamespace>Zeayii.Flow.Presentation</RootNamespace>
+    <Version>0.0.1</Version>
+    <AssemblyVersion>0.0.0.1</AssemblyVersion>
+    <FileVersion>0.0.0.1</FileVersion>
+    <Authors>Master</Authors>
+    <Company>Zeayii</Company>
+    <Product>Zeayii.Flow</Product>
+    <Description>Flow terminal presentation layer.</Description>
+    <RepositoryUrl>https://github.com/zeayii/flow</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- ======================================================
+       基础编译配置
+       ====================================================== -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+
+    <!-- 展示层是可裁剪类库，但不直接作为 AOT 入口。 -->
+    <PublishAot>false</PublishAot>
+    <TrimMode>full</TrimMode>
+    <IsTrimmable>true</IsTrimmable>
+    <EnableDynamicLoading>false</EnableDynamicLoading>
+
+    <!-- Presentation 不直接承载卫星资源，但保持三平台构建一致性。 -->
+    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <!-- ======================================================
+       UI 与 DI 依赖
+       ====================================================== -->
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" Version="0.54.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
+  </ItemGroup>
+
+</Project>

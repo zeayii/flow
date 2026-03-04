@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value></resheader>
+  <data name="RootDescription" xml:space="preserve"><value>Flow コマンドラインインターフェース。</value></data>
+  <data name="PlanArgumentDescription" xml:space="preserve"><value>タスク記述 JSON ファイルのパス。</value></data>
+  <data name="TaskConcurrencyDescription" xml:space="preserve"><value>タスク並列数。</value></data>
+  <data name="SubtaskConcurrencyDescription" xml:space="preserve"><value>ディレクトリ内ファイルの並列数。</value></data>
+  <data name="RetryAttemptsDescription" xml:space="preserve"><value>ファイルごとの最大リトライ回数。</value></data>
+  <data name="BlockSizeDescription" xml:space="preserve"><value>バッファサイズ（KiB）。</value></data>
+  <data name="ConflictPolicyDescription" xml:space="preserve"><value>競合ポリシー: resume, overwrite, rename。</value></data>
+  <data name="TaskFailurePolicyDescription" xml:space="preserve"><value>タスク失敗ポリシー: Continue, StopCurrentTask, StopAll。</value></data>
+  <data name="DryRunDescription" xml:space="preserve"><value>実行せずに解決済みプランを表示します。</value></data>
+  <data name="NoUiDescription" xml:space="preserve"><value>テキスト UI を無効化します（既定で有効）。</value></data>
+  <data name="UiRefreshDescription" xml:space="preserve"><value>UI 更新間隔（ミリ秒）。</value></data>
+  <data name="UiLogTailDescription" xml:space="preserve"><value>ログ末尾領域の高さ（行）。</value></data>
+  <data name="UiLogMaxDescription" xml:space="preserve"><value>メモリ内の最大ログ件数。</value></data>
+  <data name="UiLogLevelDescription" xml:space="preserve"><value>表示ログレベル。</value></data>
+  <data name="LogDirectoryDescription" xml:space="preserve"><value>ファイルログの出力ディレクトリ。</value></data>
+  <data name="FileLogLevelDescription" xml:space="preserve"><value>ファイルログレベル（None は無効）。</value></data>
+  <data name="UiFailMaxDescription" xml:space="preserve"><value>タスクごとに保持する失敗エントリ数の上限。</value></data>
+  <data name="UiDoneMaxDescription" xml:space="preserve"><value>フォルダータスクごとに保持する最近完了ファイル数の上限。</value></data>
+  <data name="UiTaskMaxDescription" xml:space="preserve"><value>TUI がメモリに保持するタスク数の上限。</value></data>
+  <data name="UiPageSizeDescription" xml:space="preserve"><value>端末高さが取得できない場合の既定ページサイズ。</value></data>
+  <data name="UiFailShowDescription" xml:space="preserve"><value>詳細ビューで表示する失敗エントリ数。</value></data>
+  <data name="UiDoneShowDescription" xml:space="preserve"><value>詳細ビューで表示する最近完了ファイル数。</value></data>
+  <data name="LangDescription" xml:space="preserve"><value>表示言語。BCP 47 タグを使用します。対応: en-US, zh-CN, zh-TW, ja-JP, ko-KR。</value></data>
+  <data name="ValidationGreaterThanZero" xml:space="preserve"><value>0 より大きい必要があります。</value></data>
+</root>
+
+

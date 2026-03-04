@@ -1,0 +1,90 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ======================================================
+       Zeayii.Flow.CommandLine
+       命令行宿主层：负责参数绑定、计划加载、本地化与 NativeAOT 发布
+       ====================================================== -->
+
+  <!-- ======================================================
+       程序集与仓库元数据
+       ====================================================== -->
+  <PropertyGroup>
+    <AssemblyName>flow</AssemblyName>
+    <RootNamespace>Zeayii.Flow.CommandLine</RootNamespace>
+    <Version>0.0.1</Version>
+    <AssemblyVersion>0.0.0.1</AssemblyVersion>
+    <FileVersion>0.0.0.1</FileVersion>
+    <Authors>Master</Authors>
+    <Company>Zeayii</Company>
+    <Product>Zeayii.Flow</Product>
+    <Description>Flow command line tool for mapped cloud-drive synchronization.</Description>
+    <RepositoryUrl>https://github.com/zeayii/flow</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- ======================================================
+       基础编译配置
+       ====================================================== -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!-- CLI 工具不需要 JIT 热身，直接关闭分层编译。 -->
+    <TieredCompilation>false</TieredCompilation>
+
+    <!-- Flow 需要保留多语言资源，因此显式声明中性语言与卫星资源。 -->
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <SatelliteResourceLanguages>en-US;zh-CN;zh-TW;ja-JP;ko-KR</SatelliteResourceLanguages>
+
+    <!-- 工作流按三平台 NativeAOT 发布。 -->
+    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <!-- ======================================================
+       NativeAOT / 单文件发布配置
+       ====================================================== -->
+  <PropertyGroup>
+    <!-- 默认按 NativeAOT + 单文件发布设计，流水线可直接复用。 -->
+    <PublishAot>true</PublishAot>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+
+    <!-- Flow 需要多语言显示，不能启用不变式全局化。 -->
+    <InvariantGlobalization>false</InvariantGlobalization>
+
+    <!-- 主程序允许完整裁剪，但暂不彻底禁止反射，避免破坏依赖链。 -->
+    <TrimMode>full</TrimMode>
+    <IlcDisableReflection>false</IlcDisableReflection>
+
+    <!-- 发布产物以体积优先，关闭调试与热更新相关能力。 -->
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
+    <DebuggerSupport>false</DebuggerSupport>
+    <AssemblyDebugging>false</AssemblyDebugging>
+    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    <DisableOutOfProcTaskHost>true</DisableOutOfProcTaskHost>
+  </PropertyGroup>
+
+  <!-- ======================================================
+       依赖包
+       ====================================================== -->
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
+  </ItemGroup>
+
+  <!-- ======================================================
+       项目引用
+       ====================================================== -->
+  <ItemGroup>
+    <ProjectReference Include="..\Zeayii.Flow.Core\Zeayii.Flow.Core.csproj" />
+    <ProjectReference Include="..\Zeayii.Flow.Presentation\Zeayii.Flow.Presentation.csproj" />
+  </ItemGroup>
+
+</Project>

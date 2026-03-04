@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value></resheader>
+  <data name="RootDescription" xml:space="preserve"><value>Flow 命令行工具。</value></data>
+  <data name="PlanArgumentDescription" xml:space="preserve"><value>任务描述 JSON 文件路径。</value></data>
+  <data name="TaskConcurrencyDescription" xml:space="preserve"><value>任务并发数。</value></data>
+  <data name="SubtaskConcurrencyDescription" xml:space="preserve"><value>目录内文件并发数。</value></data>
+  <data name="RetryAttemptsDescription" xml:space="preserve"><value>每个文件的最大重试次数。</value></data>
+  <data name="BlockSizeDescription" xml:space="preserve"><value>缓冲区大小（KiB）。</value></data>
+  <data name="ConflictPolicyDescription" xml:space="preserve"><value>冲突策略：resume、overwrite、rename。</value></data>
+  <data name="TaskFailurePolicyDescription" xml:space="preserve"><value>任务失败策略：Continue、StopCurrentTask、StopAll。</value></data>
+  <data name="DryRunDescription" xml:space="preserve"><value>仅打印解析后的计划，不执行。</value></data>
+  <data name="NoUiDescription" xml:space="preserve"><value>禁用文本 UI（默认启用）。</value></data>
+  <data name="UiRefreshDescription" xml:space="preserve"><value>UI 刷新间隔（毫秒）。</value></data>
+  <data name="UiLogTailDescription" xml:space="preserve"><value>日志尾部区域高度（行）。</value></data>
+  <data name="UiLogMaxDescription" xml:space="preserve"><value>内存中的最大日志条目数。</value></data>
+  <data name="UiLogLevelDescription" xml:space="preserve"><value>展示层日志级别。</value></data>
+  <data name="LogDirectoryDescription" xml:space="preserve"><value>文件日志目录。</value></data>
+  <data name="FileLogLevelDescription" xml:space="preserve"><value>文件日志级别（None 表示禁用文件日志）。</value></data>
+  <data name="UiFailMaxDescription" xml:space="preserve"><value>每个任务保留的最大失败条目数。</value></data>
+  <data name="UiDoneMaxDescription" xml:space="preserve"><value>每个目录任务保留的最近完成文件数上限。</value></data>
+  <data name="UiTaskMaxDescription" xml:space="preserve"><value>TUI 在内存中保留的最大任务数。</value></data>
+  <data name="UiPageSizeDescription" xml:space="preserve"><value>终端高度不可用时的默认分页大小。</value></data>
+  <data name="UiFailShowDescription" xml:space="preserve"><value>详情视图中可见的失败条目数量。</value></data>
+  <data name="UiDoneShowDescription" xml:space="preserve"><value>详情视图中可见的最近完成文件数量。</value></data>
+  <data name="LangDescription" xml:space="preserve"><value>界面语言，使用 BCP 47 标签。支持：en-US、zh-CN、zh-TW、ja-JP、ko-KR。</value></data>
+  <data name="ValidationGreaterThanZero" xml:space="preserve"><value>必须大于零。</value></data>
+</root>
+
+
