@@ -55,19 +55,19 @@ internal static class RenderText
     /// </summary>
     /// <param name="status">任务状态。</param>
     /// <returns>颜色名称。</returns>
-    public static string GetTaskStatusColorName(TaskStatus status)
+    public static Color GetTaskStatusColor(TaskStatus status)
     {
         return status switch
         {
-            TaskStatus.Pending => "yellow",
-            TaskStatus.Scanning => "khaki1",
-            TaskStatus.Running => "deepskyblue1",
-            TaskStatus.Completed => "green",
-            TaskStatus.CompletedWithErrors => "orange1",
-            TaskStatus.Failed => "red",
-            TaskStatus.Canceled => "grey",
-            TaskStatus.Skipped => "darkorange3",
-            _ => "white"
+            TaskStatus.Pending => PresentationPalette.Warning,
+            TaskStatus.Scanning => Color.Khaki1,
+            TaskStatus.Running => PresentationPalette.Accent,
+            TaskStatus.Completed => PresentationPalette.Success,
+            TaskStatus.CompletedWithErrors => Color.Orange1,
+            TaskStatus.Failed => PresentationPalette.Failure,
+            TaskStatus.Canceled => PresentationPalette.Muted,
+            TaskStatus.Skipped => PresentationPalette.Skipped,
+            _ => PresentationPalette.Info
         };
     }
 
@@ -76,17 +76,17 @@ internal static class RenderText
     /// </summary>
     /// <param name="status">文件状态。</param>
     /// <returns>颜色名称。</returns>
-    public static string GetFileStatusColorName(FileItemStatus status)
+    public static Color GetFileStatusColor(FileItemStatus status)
     {
         return status switch
         {
-            FileItemStatus.Pending => "yellow",
-            FileItemStatus.Running => "deepskyblue1",
-            FileItemStatus.Completed => "green",
-            FileItemStatus.Failed => "red",
-            FileItemStatus.Skipped => "darkorange3",
-            FileItemStatus.Canceled => "grey",
-            _ => "white"
+            FileItemStatus.Pending => PresentationPalette.Warning,
+            FileItemStatus.Running => PresentationPalette.Accent,
+            FileItemStatus.Completed => PresentationPalette.Success,
+            FileItemStatus.Failed => PresentationPalette.Failure,
+            FileItemStatus.Skipped => PresentationPalette.Skipped,
+            FileItemStatus.Canceled => PresentationPalette.Muted,
+            _ => PresentationPalette.Info
         };
     }
 
@@ -114,17 +114,17 @@ internal static class RenderText
     /// </summary>
     /// <param name="level">日志等级。</param>
     /// <returns>颜色名称。</returns>
-    public static string GetLogLevelColorName(PresentationLogLevel level)
+    public static Color GetLogLevelColor(PresentationLogLevel level)
     {
         return level switch
         {
-            PresentationLogLevel.Trace => "grey",
-            PresentationLogLevel.Debug => "deepskyblue1",
-            PresentationLogLevel.Information => "green",
-            PresentationLogLevel.Warning => "yellow",
-            PresentationLogLevel.Error => "red",
-            PresentationLogLevel.Critical => "bold red",
-            _ => "white"
+            PresentationLogLevel.Trace => PresentationPalette.Muted,
+            PresentationLogLevel.Debug => PresentationPalette.Accent,
+            PresentationLogLevel.Information => PresentationPalette.Success,
+            PresentationLogLevel.Warning => PresentationPalette.Warning,
+            PresentationLogLevel.Error => PresentationPalette.Failure,
+            PresentationLogLevel.Critical => PresentationPalette.Failure,
+            _ => PresentationPalette.Info
         };
     }
 
@@ -132,11 +132,11 @@ internal static class RenderText
     /// 对文本应用颜色。
     /// </summary>
     /// <param name="plainText">纯文本。</param>
-    /// <param name="colorName">颜色名称。</param>
+    /// <param name="color">颜色。</param>
     /// <returns>带样式文本。</returns>
-    public static string ColorizePlain(string plainText, string colorName)
+    public static string ColorizePlain(string plainText, Color color)
     {
-        return $"[{colorName}]{Markup.Escape(plainText)}[/]";
+        return $"[{color}]{Markup.Escape(plainText)}[/]";
     }
 
     /// <summary>
@@ -146,7 +146,7 @@ internal static class RenderText
     /// <param name="totalBytes">总字节数。</param>
     /// <param name="width">进度条宽度。</param>
     /// <returns>文本进度条。</returns>
-    public static string BuildProgressBar(long transferredBytes, long? totalBytes, int width, string fillColorName)
+    public static string BuildProgressBar(long transferredBytes, long? totalBytes, int width, Color fillColor)
     {
         if (width <= 0)
         {
@@ -156,7 +156,7 @@ internal static class RenderText
         var barChar = AnsiConsole.Profile.Capabilities.Unicode ? '━' : '-';
         if (!totalBytes.HasValue || totalBytes.Value <= 0)
         {
-            return GetFixedWidthMarkup($"[grey]{new string(barChar, width)}[/]", width);
+            return GetFixedWidthMarkup($"[{PresentationPalette.Muted}]{new string(barChar, width)}[/]", width);
         }
 
         var ratio = Math.Clamp(transferredBytes / (double)totalBytes.Value, 0d, 1d);
@@ -164,7 +164,7 @@ internal static class RenderText
         var remaining = width - filled;
         var filledText = filled > 0 ? new string(barChar, filled) : string.Empty;
         var remainingText = remaining > 0 ? new string(barChar, remaining) : string.Empty;
-        return $"[{fillColorName}]{Markup.Escape(filledText)}[/][grey]{Markup.Escape(remainingText)}[/]";
+        return $"[{fillColor}]{Markup.Escape(filledText)}[/][{PresentationPalette.Muted}]{Markup.Escape(remainingText)}[/]";
     }
 
     /// <summary>

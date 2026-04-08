@@ -52,7 +52,7 @@ internal static class ConsoleOutput
     /// <param name="message">错误内容。</param>
     public static void WriteErrorLine(string message)
     {
-        AnsiConsole.Console.Write(new Markup($"[red]{Markup.Escape(message)}[/]"));
+        AnsiConsole.Console.Write(new Markup($"[{Color.IndianRed1}]{Markup.Escape(message)}[/]"));
         AnsiConsole.Console.Write(new Text(Environment.NewLine));
     }
 
@@ -66,7 +66,7 @@ internal static class ConsoleOutput
         var safeScope = string.IsNullOrWhiteSpace(scope) ? "global" : scope;
         var safeMessage = string.IsNullOrWhiteSpace(message) ? "-" : message;
         var line = $"[{DateTimeOffset.Now:HH:mm:ss}] [ERR] [{safeScope}] {safeMessage}";
-        AnsiConsole.Console.Write(new Markup($"[red]{Markup.Escape(line)}[/]"));
+        AnsiConsole.Console.Write(new Markup($"[{Color.IndianRed1}]{Markup.Escape(line)}[/]"));
         AnsiConsole.Console.Write(new Text(Environment.NewLine));
     }
 }

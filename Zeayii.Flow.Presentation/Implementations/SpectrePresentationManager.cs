@@ -41,12 +41,12 @@ public sealed partial class SpectrePresentationManager : IPresentationManager, I
     /// <summary>
     /// 主界面底部帮助文本。
     /// </summary>
-    private static readonly Markup MainFooterMarkup = new("[grey]Tasks[/] Up/Down/PgUp/PgDn/Home/End   [grey]Summary[/] Ctrl+Up/Down/PgUp/PgDn/Home/End   [grey]Logs[/] Alt+Up/Down/PgUp/PgDn/Home/End   [grey]Details[/] Enter   [red]Exit[/] Ctrl+C");
+    private static readonly Markup MainFooterMarkup = new($"[{PresentationPalette.Muted}]Tasks[/] Up/Down/PgUp/PgDn/Home/End   [{PresentationPalette.Muted}]Summary[/] Ctrl+Up/Down/PgUp/PgDn/Home/End   [{PresentationPalette.Muted}]Logs[/] Alt+Up/Down/PgUp/PgDn/Home/End   [{PresentationPalette.Muted}]Details[/] Enter   [{PresentationPalette.Failure}]Exit[/] Ctrl+C");
 
     /// <summary>
     /// 详情页底部帮助文本。
     /// </summary>
-    private static readonly Markup DetailsFooterMarkup = new("[grey]Files[/] Up/Down/PgUp/PgDn/Home/End   [grey]Back[/] Esc   [red]Exit[/] Ctrl+C");
+    private static readonly Markup DetailsFooterMarkup = new($"[{PresentationPalette.Muted}]Files[/] Up/Down/PgUp/PgDn/Home/End   [{PresentationPalette.Muted}]Back[/] Esc   [{PresentationPalette.Failure}]Exit[/] Ctrl+C");
 
     /// <summary>
     /// Presentation 配置项。

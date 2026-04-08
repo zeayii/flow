@@ -169,8 +169,8 @@ public sealed partial class SpectrePresentationManager
         var now = DateTimeOffset.UtcNow;
         var rows = new List<IRenderable>(Math.Max(8, height))
         {
-            new Markup($"[grey]{RenderText.PadRightPlain("State", LeftStatusWidth)} {RenderText.PadRightPlain("Name", LeftNameWidth)} {RenderText.PadRightPlain("Progress", LeftProgressWidth)} {RenderText.PadRightPlain("Done/Total", LeftSizeWidth)} {RenderText.PadRightPlain("Speed", LeftSpeedWidth)} {RenderText.PadRightPlain("Time", LeftElapsedWidth)} {RenderText.PadLeftPlain("Done", LeftCountWidth)} {RenderText.PadLeftPlain("Total", LeftCountWidth)} {RenderText.PadLeftPlain("Fail", LeftCountWidth)}[/]"),
-            new Markup($"[grey]{new string('─', contentWidth)}[/]")
+            new Markup($"[{PresentationPalette.Muted}]{RenderText.PadRightPlain("State", LeftStatusWidth)} {RenderText.PadRightPlain("Name", LeftNameWidth)} {RenderText.PadRightPlain("Progress", LeftProgressWidth)} {RenderText.PadRightPlain("Done/Total", LeftSizeWidth)} {RenderText.PadRightPlain("Speed", LeftSpeedWidth)} {RenderText.PadRightPlain("Time", LeftElapsedWidth)} {RenderText.PadLeftPlain("Done", LeftCountWidth)} {RenderText.PadLeftPlain("Total", LeftCountWidth)} {RenderText.PadLeftPlain("Fail", LeftCountWidth)}[/]"),
+            new Markup($"[{PresentationPalette.Muted}]{new string('─', contentWidth)}[/]")
         };
 
         var visibleRows = Math.Max(1, height - 5);
@@ -180,7 +180,7 @@ public sealed partial class SpectrePresentationManager
 
         if (offset > 0)
         {
-            rows.Add(new Markup("[grey]↑ more[/]"));
+            rows.Add(new Markup($"[{PresentationPalette.Muted}]↑ more[/]"));
         }
 
         for (var index = 0; index < visibleRows && offset + index < taskIds.Count; index++)
@@ -189,15 +189,15 @@ public sealed partial class SpectrePresentationManager
             var elapsedText = RenderText.FormatElapsed(task.StartedAt, task.CompletedAt, now);
             var progressColor = task.Status switch
             {
-                TaskStatus.Completed => RenderText.GetTaskStatusColorName(TaskStatus.Completed),
-                TaskStatus.Skipped => RenderText.GetTaskStatusColorName(TaskStatus.Skipped),
-                TaskStatus.Failed => RenderText.GetTaskStatusColorName(TaskStatus.Failed),
-                TaskStatus.CompletedWithErrors => RenderText.GetTaskStatusColorName(TaskStatus.CompletedWithErrors),
-                _ => RenderText.GetTaskStatusColorName(TaskStatus.Running)
+                TaskStatus.Completed => RenderText.GetTaskStatusColor(TaskStatus.Completed),
+                TaskStatus.Skipped => RenderText.GetTaskStatusColor(TaskStatus.Skipped),
+                TaskStatus.Failed => RenderText.GetTaskStatusColor(TaskStatus.Failed),
+                TaskStatus.CompletedWithErrors => RenderText.GetTaskStatusColor(TaskStatus.CompletedWithErrors),
+                _ => RenderText.GetTaskStatusColor(TaskStatus.Running)
             };
             var progressMarkup = RenderText.BuildProgressBar(task.TransferredBytes, task.TotalBytes, LeftProgressWidth, progressColor);
             var markupLine = RenderText.GetFixedWidthMarkup(string.Join(" ",
-                RenderText.ColorizePlain(RenderText.PadRightPlain(RenderText.FormatTaskStatusLabel(task.Status), LeftStatusWidth), RenderText.GetTaskStatusColorName(task.Status)),
+                RenderText.ColorizePlain(RenderText.PadRightPlain(RenderText.FormatTaskStatusLabel(task.Status), LeftStatusWidth), RenderText.GetTaskStatusColor(task.Status)),
                 Markup.Escape(RenderText.TruncateAndPad(task.Descriptor.DisplayName, LeftNameWidth)),
                 progressMarkup,
                 Markup.Escape(RenderText.PadRightPlain($"{RenderText.FormatBytes(task.TransferredBytes)}/{RenderText.FormatBytes(task.TotalBytes ?? 0)}", LeftSizeWidth)),
@@ -205,7 +205,7 @@ public sealed partial class SpectrePresentationManager
                 Markup.Escape(RenderText.PadRightPlain(elapsedText, LeftElapsedWidth)),
                 Markup.Escape(RenderText.FormatBoundedCount(task.FilesDone, LeftCountWidth)),
                 Markup.Escape(RenderText.FormatBoundedCount(task.FilesTotal, LeftCountWidth)),
-                $"[red]{Markup.Escape(RenderText.FormatBoundedCount(task.FailedFiles, LeftCountWidth))}[/]"), contentWidth);
+                $"[{PresentationPalette.Failure}]{Markup.Escape(RenderText.FormatBoundedCount(task.FailedFiles, LeftCountWidth))}[/]"), contentWidth);
 
             var isSelected = offset + index == _state.SelectedTaskIndex;
             rows.Add(isSelected ? new Markup(markupLine, SelectedTaskRowStyle) : new Markup(markupLine));
@@ -213,12 +213,12 @@ public sealed partial class SpectrePresentationManager
 
         if (offset + visibleRows < taskIds.Count)
         {
-            rows.Add(new Markup("[grey]↓ more[/]"));
+            rows.Add(new Markup($"[{PresentationPalette.Muted}]↓ more[/]"));
         }
 
         if (taskIds.Count == 0)
         {
-            rows.Add(new Markup("[grey]No tasks[/]"));
+            rows.Add(new Markup($"[{PresentationPalette.Muted}]No tasks[/]"));
         }
 
         return new Panel(new Rows(rows.ToArray()))
@@ -251,7 +251,7 @@ public sealed partial class SpectrePresentationManager
 
         if (offset > 0)
         {
-            rows.Add(new Markup("[grey]↑ more[/]"));
+            rows.Add(new Markup($"[{PresentationPalette.Muted}]↑ more[/]"));
             consumedRows++;
         }
 
@@ -266,7 +266,7 @@ public sealed partial class SpectrePresentationManager
             rowCursor++;
             if (headerRowIndex >= offset && consumedRows < visibleRows)
             {
-                rows.Add(new Markup($"[{section.ColorName}]{Markup.Escape(section.Title)}[/]"));
+                rows.Add(new Markup($"[{section.Color}]{Markup.Escape(section.Title)}[/]"));
                 consumedRows++;
             }
 
@@ -291,12 +291,12 @@ public sealed partial class SpectrePresentationManager
 
         if (offset + visibleRows < totalRows)
         {
-            rows.Add(new Markup("[grey]↓ more[/]"));
+            rows.Add(new Markup($"[{PresentationPalette.Muted}]↓ more[/]"));
         }
 
         if (totalRows == 0)
         {
-            rows.Add(new Markup("[grey]No tasks[/]"));
+            rows.Add(new Markup($"[{PresentationPalette.Muted}]No tasks[/]"));
         }
 
         return new Panel(new Rows(rows.ToArray()))
@@ -333,7 +333,7 @@ public sealed partial class SpectrePresentationManager
 
         if (offset > 0)
         {
-            rows.Add(new Markup("[grey]↑ more[/]"));
+            rows.Add(new Markup($"[{PresentationPalette.Muted}]↑ more[/]"));
         }
 
         var entries = _state.LogEntries.CopyWindow(offset, visibleRows);
@@ -342,17 +342,17 @@ public sealed partial class SpectrePresentationManager
             var prefix = $"{entry.Timestamp:HH:mm:ss} [{RenderText.GetLogLevelTag(entry.Level)}]";
             var prefixWidth = RenderText.GetDisplayWidth(prefix);
             var message = string.IsNullOrWhiteSpace(entry.Scope) ? "[global] " + entry.Message : $"[{entry.Scope}] {entry.Message}";
-            rows.Add(new Markup($"[grey]{Markup.Escape(prefix)}[/] [{RenderText.GetLogLevelColorName(entry.Level)}]{Markup.Escape(RenderText.TruncateAndPad(message, Math.Max(4, contentWidth - prefixWidth - 1)))}[/]"));
+            rows.Add(new Markup($"[{PresentationPalette.Muted}]{Markup.Escape(prefix)}[/] [{RenderText.GetLogLevelColor(entry.Level)}]{Markup.Escape(RenderText.TruncateAndPad(message, Math.Max(4, contentWidth - prefixWidth - 1)))}[/]"));
         }
 
         if (offset + visibleRows < _state.LogEntries.Count)
         {
-            rows.Add(new Markup("[grey]↓ more[/]"));
+            rows.Add(new Markup($"[{PresentationPalette.Muted}]↓ more[/]"));
         }
 
         if (_state.LogEntries.Count == 0)
         {
-            rows.Add(new Markup("[grey]No logs[/]"));
+            rows.Add(new Markup($"[{PresentationPalette.Muted}]No logs[/]"));
         }
 
         return new Panel(new Rows(rows.ToArray()))
@@ -375,22 +375,22 @@ public sealed partial class SpectrePresentationManager
     {
         if (_state.DetailsTaskId is null || !_state.Tasks.TryGetValue(_state.DetailsTaskId, out var task))
         {
-            return new Panel(new Markup("[grey]No selected task[/]")) { Border = BoxBorder.Rounded, Header = new PanelHeader(" Task Details "), Width = width, Height = height };
+            return new Panel(new Markup($"[{PresentationPalette.Muted}]No selected task[/]")) { Border = BoxBorder.Rounded, Header = new PanelHeader(" Task Details "), Width = width, Height = height };
         }
 
         var files = _state.GetSelectedTaskFiles();
         var failedFiles = files.Where(file => file.Status == FileItemStatus.Failed).Take(Math.Min(_options.VisibleFailuresInDetail, _options.MaxFailuresPerTask)).Select(file => file.RelativePath).ToArray();
         var completedFiles = files.Where(file => file.Status == FileItemStatus.Completed).Take(Math.Min(_options.VisibleRecentCompletedFilesInDetail, _options.MaxRecentCompletedFilesPerFolderTask)).Select(file => file.RelativePath).ToArray();
         var rows = new Rows(
-            new Markup($"[grey]Name[/]: {Markup.Escape(task.Descriptor.DisplayName)}"),
-            new Markup($"[grey]Status[/]: [{RenderText.GetTaskStatusColorName(task.Status)}]{Markup.Escape(RenderText.FormatTaskStatusLabel(task.Status))}[/]  [grey]Speed[/]: [green]{Markup.Escape(RenderText.FormatBytesPerSecond(task.BytesPerSecond))}[/]"),
-            new Markup($"[grey]Size[/]: [green]{Markup.Escape(RenderText.FormatBytes(task.TransferredBytes))}[/] / [green]{Markup.Escape(RenderText.FormatBytes(task.TotalBytes ?? 0))}[/]"),
-            new Markup($"[grey]Files[/]: [green]{task.FilesDone}[/] / [grey]{task.FilesTotal}[/] / [red]{task.FailedFiles}[/]"),
-            new Markup($"[grey]Source[/]: {Markup.Escape(task.Descriptor.SourcePath)}"),
-            new Markup($"[grey]Destination[/]: {Markup.Escape(task.Descriptor.DestinationPath)}"),
-            new Markup($"[grey]Failed Sample[/]: {Markup.Escape(failedFiles.Length == 0 ? "-" : string.Join(", ", failedFiles))}"),
-            new Markup($"[grey]Done Sample[/]: {Markup.Escape(completedFiles.Length == 0 ? "-" : string.Join(", ", completedFiles))}"),
-            new Markup($"[grey]Message[/]: {Markup.Escape(task.StatusMessage ?? task.ErrorSummary ?? "-")}")
+            new Markup($"[{PresentationPalette.Muted}]Name[/]: {Markup.Escape(task.Descriptor.DisplayName)}"),
+            new Markup($"[{PresentationPalette.Muted}]Status[/]: [{RenderText.GetTaskStatusColor(task.Status)}]{Markup.Escape(RenderText.FormatTaskStatusLabel(task.Status))}[/]  [{PresentationPalette.Muted}]Speed[/]: [{PresentationPalette.Success}]{Markup.Escape(RenderText.FormatBytesPerSecond(task.BytesPerSecond))}[/]"),
+            new Markup($"[{PresentationPalette.Muted}]Size[/]: [{PresentationPalette.Success}]{Markup.Escape(RenderText.FormatBytes(task.TransferredBytes))}[/] / [{PresentationPalette.Success}]{Markup.Escape(RenderText.FormatBytes(task.TotalBytes ?? 0))}[/]"),
+            new Markup($"[{PresentationPalette.Muted}]Files[/]: [{PresentationPalette.Success}]{task.FilesDone}[/] / [{PresentationPalette.Muted}]{task.FilesTotal}[/] / [{PresentationPalette.Failure}]{task.FailedFiles}[/]"),
+            new Markup($"[{PresentationPalette.Muted}]Source[/]: {Markup.Escape(task.Descriptor.SourcePath)}"),
+            new Markup($"[{PresentationPalette.Muted}]Destination[/]: {Markup.Escape(task.Descriptor.DestinationPath)}"),
+            new Markup($"[{PresentationPalette.Muted}]Failed Sample[/]: {Markup.Escape(failedFiles.Length == 0 ? "-" : string.Join(", ", failedFiles))}"),
+            new Markup($"[{PresentationPalette.Muted}]Done Sample[/]: {Markup.Escape(completedFiles.Length == 0 ? "-" : string.Join(", ", completedFiles))}"),
+            new Markup($"[{PresentationPalette.Muted}]Message[/]: {Markup.Escape(task.StatusMessage ?? task.ErrorSummary ?? "-")}")
         );
 
         return new Panel(rows)
@@ -422,7 +422,7 @@ public sealed partial class SpectrePresentationManager
         var pathWidth = Math.Max(8, contentWidth - statusWidth - sizeWidth - doneWidth - speedWidth - errorWidth - 5);
         var rows = new List<IRenderable>(Math.Max(8, height))
         {
-            new Markup($"[grey]{RenderText.PadRightPlain("Status", statusWidth)} {RenderText.PadRightPlain("Path", pathWidth)} {RenderText.PadLeftPlain("Size", sizeWidth)} {RenderText.PadLeftPlain("Done", doneWidth)} {RenderText.PadLeftPlain("Speed", speedWidth)} {RenderText.PadRightPlain("Error", errorWidth)}[/]"),
+            new Markup($"[{PresentationPalette.Muted}]{RenderText.PadRightPlain("Status", statusWidth)} {RenderText.PadRightPlain("Path", pathWidth)} {RenderText.PadLeftPlain("Size", sizeWidth)} {RenderText.PadLeftPlain("Done", doneWidth)} {RenderText.PadLeftPlain("Speed", speedWidth)} {RenderText.PadRightPlain("Error", errorWidth)}[/]"),
             new Markup(new string('─', contentWidth))
         };
 
@@ -433,14 +433,14 @@ public sealed partial class SpectrePresentationManager
 
         if (offset > 0)
         {
-            rows.Add(new Markup("[grey]↑ more[/]"));
+            rows.Add(new Markup($"[{PresentationPalette.Muted}]↑ more[/]"));
         }
 
         foreach (var file in files.Skip(offset).Take(visibleRows))
         {
             var errorText = file.Status == FileItemStatus.Failed ? (file.Message ?? file.ErrorCategory ?? "-") : (file.Message ?? "-");
             rows.Add(new Markup(string.Join(' ',
-                RenderText.ColorizePlain(RenderText.PadRightPlain(RenderText.FormatFileStatusLabel(file.Status), statusWidth), RenderText.GetFileStatusColorName(file.Status)),
+                RenderText.ColorizePlain(RenderText.PadRightPlain(RenderText.FormatFileStatusLabel(file.Status), statusWidth), RenderText.GetFileStatusColor(file.Status)),
                 Markup.Escape(RenderText.TruncateAndPad(file.RelativePath, pathWidth)),
                 Markup.Escape(RenderText.PadLeftPlain(RenderText.FormatBytes(file.TotalBytes), sizeWidth)),
                 Markup.Escape(RenderText.PadLeftPlain(RenderText.FormatBytes(file.TransferredBytes), doneWidth)),
@@ -450,12 +450,12 @@ public sealed partial class SpectrePresentationManager
 
         if (offset + visibleRows < files.Count)
         {
-            rows.Add(new Markup("[grey]↓ more[/]"));
+            rows.Add(new Markup($"[{PresentationPalette.Muted}]↓ more[/]"));
         }
 
         if (files.Count == 0)
         {
-            rows.Add(new Markup("[grey]No files[/]"));
+            rows.Add(new Markup($"[{PresentationPalette.Muted}]No files[/]"));
         }
 
         return new Panel(new Rows(rows.ToArray()))
@@ -475,13 +475,13 @@ public sealed partial class SpectrePresentationManager
     private string BuildHeaderConfigMarkup()
     {
         return string.Join("  ",
-            $"[grey]F[/] [bold yellow]{Markup.Escape(_options.HeaderFailurePolicy)}[/]",
-            $"[grey]T[/] [bold white]{_options.HeaderTaskConcurrency}[/]",
-            $"[grey]I[/] [bold white]{_options.HeaderInnerConcurrency}[/]",
-            $"[grey]R[/] [bold white]{_options.HeaderRetryAttempts}[/]",
-            $"[grey]B[/] [bold green]{Markup.Escape(_options.HeaderBlockSizeText)}[/]",
-            $"[grey]C[/] [bold green]{Markup.Escape(_options.HeaderConflictPolicy)}[/]",
-            $"[grey]L[/] [bold green]{Markup.Escape(_options.FileLogLevel.ToString())}[/]");
+            $"[{PresentationPalette.Muted}]F[/] [{PresentationPalette.Warning}]{Markup.Escape(_options.HeaderFailurePolicy)}[/]",
+            $"[{PresentationPalette.Muted}]T[/] [{PresentationPalette.Info}]{_options.HeaderTaskConcurrency}[/]",
+            $"[{PresentationPalette.Muted}]I[/] [{PresentationPalette.Info}]{_options.HeaderInnerConcurrency}[/]",
+            $"[{PresentationPalette.Muted}]R[/] [{PresentationPalette.Info}]{_options.HeaderRetryAttempts}[/]",
+            $"[{PresentationPalette.Muted}]B[/] [{PresentationPalette.Success}]{Markup.Escape(_options.HeaderBlockSizeText)}[/]",
+            $"[{PresentationPalette.Muted}]C[/] [{PresentationPalette.Success}]{Markup.Escape(_options.HeaderConflictPolicy)}[/]",
+            $"[{PresentationPalette.Muted}]L[/] [{PresentationPalette.Success}]{Markup.Escape(_options.FileLogLevel.ToString())}[/]");
     }
 
     /// <summary>
@@ -493,13 +493,13 @@ public sealed partial class SpectrePresentationManager
         var counts = GetTaskCounts();
         var totalSpeed = _state.Tasks.Values.Sum(task => task.BytesPerSecond);
         return string.Join("  ",
-            BuildSummaryBadge("R", counts.Running, "deepskyblue1"),
-            BuildSummaryBadge("F", counts.Failed, "red"),
-            BuildSummaryBadge("P", counts.Pending, "yellow"),
-            BuildSummaryBadge("D", counts.Completed, "green"),
-            BuildSummaryBadge("S", counts.Skipped, RenderText.GetTaskStatusColorName(TaskStatus.Skipped)),
-            BuildSummaryBadge("T", counts.Total, "white"),
-            $"[green]V[/] {Markup.Escape(RenderText.FormatFixedSpeed(totalSpeed, HeaderSpeedWidth))}");
+            BuildSummaryBadge("R", counts.Running, PresentationPalette.Accent),
+            BuildSummaryBadge("F", counts.Failed, PresentationPalette.Failure),
+            BuildSummaryBadge("P", counts.Pending, PresentationPalette.Warning),
+            BuildSummaryBadge("D", counts.Completed, PresentationPalette.Success),
+            BuildSummaryBadge("S", counts.Skipped, RenderText.GetTaskStatusColor(TaskStatus.Skipped)),
+            BuildSummaryBadge("T", counts.Total, PresentationPalette.Info),
+            $"[{PresentationPalette.Success}]V[/] {Markup.Escape(RenderText.FormatFixedSpeed(totalSpeed, HeaderSpeedWidth))}");
     }
 
     /// <summary>
@@ -507,11 +507,11 @@ public sealed partial class SpectrePresentationManager
     /// </summary>
     /// <param name="label">摘要标签。</param>
     /// <param name="value">摘要值。</param>
-    /// <param name="colorName">颜色名称。</param>
+    /// <param name="color">颜色。</param>
     /// <returns>摘要标记文本。</returns>
-    private static string BuildSummaryBadge(string label, long value, string colorName)
+    private static string BuildSummaryBadge(string label, long value, Color color)
     {
-        return $"[{colorName}]{label}[/] {Markup.Escape(RenderText.FormatBoundedCount(value, HeaderCountWidth))}";
+        return $"[{color}]{label}[/] {Markup.Escape(RenderText.FormatBoundedCount(value, HeaderCountWidth))}";
     }
 
     /// <summary>
@@ -559,11 +559,11 @@ public sealed partial class SpectrePresentationManager
         var taskIds = _state.GetSortedTaskIds();
         var sections = new List<SummarySection>
         {
-            new("RUNNING", "deepskyblue1"),
-            new("FAILED", "red"),
-            new("PENDING", "yellow"),
-            new("DONE", "green"),
-            new("SKIPPED", RenderText.GetTaskStatusColorName(TaskStatus.Skipped))
+            new("RUNNING", PresentationPalette.Accent),
+            new("FAILED", PresentationPalette.Failure),
+            new("PENDING", PresentationPalette.Warning),
+            new("DONE", PresentationPalette.Success),
+            new("SKIPPED", RenderText.GetTaskStatusColor(TaskStatus.Skipped))
         };
 
         foreach (var taskId in taskIds)
@@ -628,7 +628,7 @@ public sealed partial class SpectrePresentationManager
                 var name = itemIndex < section.TaskNames.Count
                     ? section.TaskNames[itemIndex]
                     : new string(' ', MiddleNameWidth);
-                cells.Add($"[{section.ColorName}]{Markup.Escape(name)}[/]");
+                cells.Add($"[{section.Color}]{Markup.Escape(name)}[/]");
             }
 
             rows.Add(string.Join(" ", cells));
@@ -701,8 +701,8 @@ public sealed partial class SpectrePresentationManager
     /// 表示中列状态分组。
     /// </summary>
     /// <param name="Title">分组标题。</param>
-    /// <param name="ColorName">分组颜色。</param>
-    private sealed record SummarySection(string Title, string ColorName)
+    /// <param name="Color">分组颜色。</param>
+    private sealed record SummarySection(string Title, Color Color)
     {
         /// <summary>
         /// 分组内的任务名称集合。
