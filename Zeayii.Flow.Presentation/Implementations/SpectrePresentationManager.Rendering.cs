@@ -346,7 +346,8 @@ public sealed partial class SpectrePresentationManager
         var entries = _state.LogEntries.CopyWindow(offset, visibleRows);
         foreach (var entry in entries)
         {
-            var prefix = $"{entry.Timestamp:HH:mm:ss} [{RenderText.GetLogLevelTag(entry.Level)}]";
+            var localTimestamp = entry.Timestamp.ToLocalTime();
+            var prefix = $"{localTimestamp:HH:mm:ss} [{RenderText.GetLogLevelTag(entry.Level)}]";
             var prefixWidth = RenderText.GetDisplayWidth(prefix);
             var message = string.IsNullOrWhiteSpace(entry.Scope) ? "[global] " + entry.Message : $"[{entry.Scope}] {entry.Message}";
             rows.Add(new Markup($"[{PresentationPalette.Muted}]{Markup.Escape(prefix)}[/] [{RenderText.GetLogLevelColor(entry.Level)}]{Markup.Escape(RenderText.TruncateAndPad(message, Math.Max(4, contentWidth - prefixWidth - 1)))}[/]"));
