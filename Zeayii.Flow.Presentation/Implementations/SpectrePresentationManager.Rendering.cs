@@ -16,6 +16,11 @@ public sealed partial class SpectrePresentationManager
     private static readonly Style SelectedTaskRowStyle = new(background: Color.Grey);
 
     /// <summary>
+    /// 焦点区域边框样式。
+    /// </summary>
+    private static readonly Style FocusedBorderStyle = new(foreground: PresentationPalette.Info);
+
+    /// <summary>
     /// 左列固定宽度。
     /// </summary>
     private const int LeftColumnWidth = 96;
@@ -101,7 +106,7 @@ public sealed partial class SpectrePresentationManager
     private IRenderable RenderMainView(int width, int height)
     {
         var header = RenderHeader(width);
-        var footer = Align.Center(MainFooterMarkup, VerticalAlignment.Middle);
+        var footer = Align.Center(BuildMainFooterMarkup(), VerticalAlignment.Middle);
         var contentHeight = Math.Max(8, height - 6);
         var columns = ComputeMainColumns(width);
 
@@ -125,7 +130,7 @@ public sealed partial class SpectrePresentationManager
     private IRenderable RenderDetailsView(int width, int height)
     {
         var header = RenderHeader(width);
-        var footer = Align.Center(DetailsFooterMarkup, VerticalAlignment.Middle);
+        var footer = Align.Center(BuildDetailsFooterMarkup(), VerticalAlignment.Middle);
         var summaryHeight = 9;
         var fileHeight = Math.Max(8, height - summaryHeight - 7);
         return new Rows(header, RenderDetailSummaryPanel(width, summaryHeight), RenderDetailFilesPanel(width, fileHeight), footer);
@@ -225,6 +230,7 @@ public sealed partial class SpectrePresentationManager
         {
             Border = BoxBorder.Rounded,
             Header = new PanelHeader(" Tasks "),
+            BorderStyle = _state.ActiveRegion == DashboardState.DashboardFocusRegion.Tasks ? FocusedBorderStyle : Style.Plain,
             Width = width,
             Height = height,
             Padding = new Padding(0, 0, 0, 0)
@@ -303,6 +309,7 @@ public sealed partial class SpectrePresentationManager
         {
             Border = BoxBorder.Rounded,
             Header = new PanelHeader(" Status "),
+            BorderStyle = _state.ActiveRegion == DashboardState.DashboardFocusRegion.Summary ? FocusedBorderStyle : Style.Plain,
             Width = width,
             Height = height,
             Padding = new Padding(0, 0, 0, 0)
@@ -359,6 +366,7 @@ public sealed partial class SpectrePresentationManager
         {
             Border = BoxBorder.Rounded,
             Header = new PanelHeader(" Logs "),
+            BorderStyle = _state.ActiveRegion == DashboardState.DashboardFocusRegion.Logs ? FocusedBorderStyle : Style.Plain,
             Width = width,
             Height = height,
             Padding = new Padding(0, 0, 0, 0)
@@ -660,6 +668,34 @@ public sealed partial class SpectrePresentationManager
     /// <param name="MiddleWidth">中列宽度。</param>
     /// <param name="RightWidth">右列宽度。</param>
     private readonly record struct MainColumnLayout(int LeftWidth, int MiddleWidth, int RightWidth);
+
+    /// <summary>
+    /// 构建主界面底部提示。
+    /// </summary>
+    /// <returns>底部标记文本。</returns>
+    private Markup BuildMainFooterMarkup()
+    {
+        if (_state.ExitPending)
+        {
+            return new Markup($"[{PresentationPalette.Failure}]Exit armed[/] Press Enter to quit");
+        }
+
+        return MainFooterMarkup;
+    }
+
+    /// <summary>
+    /// 构建详情页底部提示。
+    /// </summary>
+    /// <returns>底部标记文本。</returns>
+    private Markup BuildDetailsFooterMarkup()
+    {
+        if (_state.ExitPending)
+        {
+            return new Markup($"[{PresentationPalette.Failure}]Exit armed[/] Press Enter to quit");
+        }
+
+        return DetailsFooterMarkup;
+    }
 
     /// <summary>
     /// 表示任务数量摘要。

@@ -311,9 +311,29 @@ public sealed partial class SpectrePresentationManager
     /// <param name="keyInfo">按键信息。</param>
     private void HandleKey(ConsoleKeyInfo keyInfo)
     {
+        if (keyInfo.Key == ConsoleKey.Enter && _state.ExitPending)
+        {
+            _shutdownCts.Cancel();
+            return;
+        }
+
+        if (keyInfo.Key == ConsoleKey.Q && keyInfo.Modifiers == 0)
+        {
+            _state.ExitPending = true;
+            return;
+        }
+
+        _state.ExitPending = false;
+
         if (_state.ViewMode == DashboardViewMode.TaskDetails)
         {
             HandleDetailsKey(keyInfo);
+            return;
+        }
+
+        if (keyInfo.Key == ConsoleKey.Tab)
+        {
+            _state.ActiveRegion = (DashboardState.DashboardFocusRegion)(((int)_state.ActiveRegion + 1) % 3);
             return;
         }
 
@@ -323,19 +343,32 @@ public sealed partial class SpectrePresentationManager
             return;
         }
 
-        if ((keyInfo.Modifiers & ConsoleModifiers.Control) == ConsoleModifiers.Control)
+        if (keyInfo.Modifiers != 0)
         {
-            HandleSummaryKey(keyInfo.Key);
             return;
         }
 
-        if ((keyInfo.Modifiers & ConsoleModifiers.Alt) == ConsoleModifiers.Alt)
-        {
-            HandleLogKey(keyInfo.Key);
-            return;
-        }
+        HandleMainViewScrollKey(keyInfo.Key);
+    }
 
-        HandleTaskListKey(keyInfo.Key);
+    /// <summary>
+    /// 根据当前焦点区域处理主界面滚动按键。
+    /// </summary>
+    /// <param name="key">按键代码。</param>
+    private void HandleMainViewScrollKey(ConsoleKey key)
+    {
+        switch (_state.ActiveRegion)
+        {
+            case DashboardState.DashboardFocusRegion.Tasks:
+                HandleTaskListKey(key);
+                break;
+            case DashboardState.DashboardFocusRegion.Summary:
+                HandleSummaryKey(key);
+                break;
+            case DashboardState.DashboardFocusRegion.Logs:
+                HandleLogKey(key);
+                break;
+        }
     }
 
     /// <summary>

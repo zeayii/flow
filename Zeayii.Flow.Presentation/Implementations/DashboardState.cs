@@ -9,6 +9,16 @@ namespace Zeayii.Flow.Presentation.Implementations;
 internal sealed class DashboardState
 {
     /// <summary>
+    /// 主界面可聚焦区域。
+    /// </summary>
+    internal enum DashboardFocusRegion
+    {
+        Tasks = 0,
+        Summary = 1,
+        Logs = 2
+    }
+
+    /// <summary>
     /// 任务排序缓存版本号。
     /// </summary>
     private int _taskVersion;
@@ -60,6 +70,16 @@ internal sealed class DashboardState
     /// 当前页面模式。
     /// </summary>
     public DashboardViewMode ViewMode { get; set; } = DashboardViewMode.Main;
+
+    /// <summary>
+    /// 当前焦点区域。
+    /// </summary>
+    public DashboardFocusRegion ActiveRegion { get; set; } = DashboardFocusRegion.Tasks;
+
+    /// <summary>
+    /// 是否等待 Enter 确认退出。
+    /// </summary>
+    public bool ExitPending { get; set; }
 
     /// <summary>
     /// 左列选中任务索引。
